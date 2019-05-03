@@ -1,7 +1,7 @@
 **A ShinyApp to search differentially expressed genes in the human placenta**
 
 ```R
-shiny::runGitHub( "sung", "ShinyPlacentome" ) 
+shiny::runGitHub("ShinyPlacentome", "sung") 
 ```
 
 
