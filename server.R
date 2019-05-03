@@ -6,6 +6,9 @@
 # Last modified 1/May/2019
 
 library(shiny)
+library(DT)
+library(data.table)
+
 load("RData/DEG.RData")
 
 # Define server logic required to draw a histogram
