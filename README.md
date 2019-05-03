@@ -5,6 +5,7 @@
 2. data.table
 
 ```R
+# run this command from your R session
 shiny::runGitHub("ShinyPlacentome", "sung") 
 ```
 
