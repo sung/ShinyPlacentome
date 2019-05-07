@@ -3,7 +3,6 @@
 # https://www.obgyn.cam.ac.uk/staff/research-staff/sung-gong/
 # https://github.com/sung
 # First created 1/May/2019
-# Last modified 1/May/2019
 
 library(shiny)
 #library(shinythemes)
@@ -12,7 +11,8 @@ library(shiny)
 #load("RData/DEG.RData") # client-side gene selection with selectize
 #gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol # client side list of genes
 
-navbarPage(
+navbarPage(title="POPS Placenta Transcriptome",
+    # below works
 #    withTags({
 #        head(
 #                script(
@@ -20,8 +20,6 @@ navbarPage(
 #                )
 #        )
 #    }),
-
-    title="POPS Placenta Transcriptome",
 
     #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")), # does not work
 
@@ -114,7 +112,7 @@ navbarPage(
                     # drop down 
                     sidebarPanel(
                     #    textInput("gene", "Gene Name (HGNC):", "FSTL3") # old-school
-                    #    selectizeInput("genes","Gene Name(s):", choices=gene.names, selected = "FSTL3", multiple=TRUE) # client side
+                    #    selectizeInput("genes","Gene Name(s):", choices=gene.names, selected = "FSTL4", multiple=TRUE) # client side
                         selectizeInput("genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
                     ),
             
@@ -157,18 +155,27 @@ navbarPage(
     ),
 
     tabPanel(title="Genome Browser",
-        #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")) # does not work
-        tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js") # it works
-        #withTags({
-        #    head(
-        #            script(
-        #                src="http://www.biodalliance.org/release-0.13/dalliance-compiled.js"
-        #            )
-        #    )
-        #}) # this also works!
+        fluidPage(
+            #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")) # does not work
+            tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js"), # it works
+            #withTags({
+            #    head(
+            #            script(
+            #                src="http://www.biodalliance.org/release-0.13/dalliance-compiled.js"
+            #            )
+            #    )
+            #}), # this also works!
+
+            includeScript(path = "js/dalliance_ui.js"),
+
+            tags$div(id="svgHolder","Dalliance goes here...")
+            #tags$script(HTML("if (window.innerHeight < 400) alert('Screen too small');"))
+        )
     ),
 
     tabPanel("About",
-            "This panel is intentionally left blank"
+             fluidPage(
+                 includeMarkdown("about.md")
+             )
     )
 )

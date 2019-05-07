@@ -3,7 +3,6 @@
 # https://www.obgyn.cam.ac.uk/staff/research-staff/sung-gong/
 # https://github.com/sung
 # First created 1/May/2019
-# Last modified 1/May/2019
 
 library(shiny)
 library(DT)
