@@ -8,32 +8,24 @@
 library(shiny)
 #library(shinythemes)
 # Define UI for application that draws a histogram
+
+#load("RData/DEG.RData") # client-side gene selection with selectize
+#gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol # client side list of genes
+
 navbarPage(
+#    withTags({
+#        head(
+#                script(
+#                    src="http://www.biodalliance.org/release-0.13/dalliance-compiled.js"
+#                )
+#        )
+#    }),
+
     title="POPS Placenta Transcriptome",
 
-    navbarMenu("DEG",
-        tabPanel("By gene name",
-            fluidPage(
-                sidebarLayout(
-                    # drop down 
-                    sidebarPanel(
-                        textInput("gene", "Gene Name (HGNC):", "FSTL3")
-                    ),
-            
-                    # Show a plot of the generated distribution
-                    mainPanel(
-                        tabsetPanel(
-                            tabPanel("By P-value",
-                                DT::dataTableOutput('deg_gene_pval')
-                            ),
-                            tabPanel("By Bootstrap",
-                                DT::dataTableOutput('deg_gene_boot')
-                            )
-                        )
-                    ) 
-                )
-            )
-        ),
+    #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")), # does not work
+
+    navbarMenu("Browse DEG",
         tabPanel("By P-value",
             fluidPage(
                 sidebarLayout(
@@ -75,6 +67,7 @@ navbarPage(
                 ) # end of sidebarLayout
             ) # end of fluidPage
         ), # end of tabPanel p-value
+
         tabPanel("By fold-change (bootstrap)",
             fluidPage(
                 sidebarLayout(
@@ -111,24 +104,70 @@ navbarPage(
                     ) # end of mainPanel
                 ) # end of sidebarLayout
             ) # end of fluidPage
-        )# end of tabPanel by FC
+        ) # end of tabPanel by FC
     ), # end of navbarMenu DEG
     
     navbarMenu("Search",
-        tabPanel("ENSEMBL ID",
+        tabPanel("By gene name",
             fluidPage(
                 sidebarLayout(
                     # drop down 
                     sidebarPanel(
-                        textInput("ensg_id", "Text input:", "general")
+                    #    textInput("gene", "Gene Name (HGNC):", "FSTL3") # old-school
+                    #    selectizeInput("genes","Gene Name(s):", choices=gene.names, selected = "FSTL3", multiple=TRUE) # client side
+                        selectizeInput("genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
                     ),
             
                     # Show a plot of the generated distribution
-                    mainPanel("hello")
+                    mainPanel(
+                        tabsetPanel(
+                            tabPanel("By P-value",
+                                DT::dataTableOutput('deg_gene_pval')
+                            ),
+                            tabPanel("By Bootstrap",
+                                DT::dataTableOutput('deg_gene_boot')
+                            )
+                        )
+                    ) # end of mainPanel
+                )
+            )
+        ),
+        tabPanel("By ENSEMBL ID",
+            fluidPage(
+                sidebarLayout(
+                    # drop down 
+                    sidebarPanel(
+                        selectizeInput("ensgs","ENSG ID(s):", choices=NULL, multiple=TRUE) # server side
+                    ),
+            
+                    # Show a plot of the generated distribution
+                    mainPanel(
+                        tabsetPanel(
+                            tabPanel("By P-value",
+                                DT::dataTableOutput('deg_ensg_pval')
+                            ),
+                            tabPanel("By Bootstrap",
+                                DT::dataTableOutput('deg_ensg_boot')
+                            )
+                        )
+                    ) # end of mainPanel
                 )
             )
         )
     ),
+
+    tabPanel(title="Genome Browser",
+        #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")) # does not work
+        tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js") # it works
+        #withTags({
+        #    head(
+        #            script(
+        #                src="http://www.biodalliance.org/release-0.13/dalliance-compiled.js"
+        #            )
+        #    )
+        #}) # this also works!
+    ),
+
     tabPanel("About",
             "This panel is intentionally left blank"
     )
