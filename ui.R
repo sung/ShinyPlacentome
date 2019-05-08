@@ -117,9 +117,9 @@ navbarPage(title="POPS Placenta Transcriptome",
         tabPanel("By gene name",
             fluidPage(
                 sidebarLayout(
-                    helpText("Search DEGs by gene names(s) HGNC"),
-                    # drop down 
                     sidebarPanel(
+                        helpText("Search DEGs by gene names(s) HGNC"),
+                    # drop down 
                     #    textInput("gene", "Gene Name (HGNC):", "FSTL3") # old-school
                     #    selectizeInput("genes","Gene Name(s):", choices=gene.names, selected = "FSTL4", multiple=TRUE) # client side
                         selectizeInput("genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
@@ -142,9 +142,9 @@ navbarPage(title="POPS Placenta Transcriptome",
         tabPanel("By ENSEMBL ID",
             fluidPage(
                 sidebarLayout(
-                    helpText("Search DEGs by Ensembl ID(s)"),
-                    # drop down 
                     sidebarPanel(
+                        helpText("Search DEGs by Ensembl ID(s)"),
+                        # drop down 
                         selectizeInput("ensgs","ENSG ID(s):", choices=NULL, multiple=TRUE) # server side
                     ),
             
