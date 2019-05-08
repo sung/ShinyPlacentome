@@ -5,6 +5,7 @@
     viewEnd:             693399,
     cookieKey:           'human-grc_h38',
 
+
     coordSystem: {
       speciesName: 'Human',
       taxon: 9606,
@@ -15,6 +16,7 @@
 
     uiPrefix: '//www.biodalliance.org/release-0.13/',
     fullScreen: true,
+    reverseScrolling: true,
 
     chains: {
       hg19ToHg38: new Chainset('http://www.derkholm.net:8080/das/hg19ToHg38/', 'GRCh37', 'GRCh38',
