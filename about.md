@@ -4,8 +4,11 @@
 ## Disclaimer
 > The views expressed are those of the author(s) and not necessarily those of the NHS, the NIHR or the Department of Health and Social Care.
 
+## Reference
+> Under review...
+
 ## Availability
 * The source code is available [here](https://github.com/sung/ShinyPlacentome)
 
 ***
-Developed by Sung Gong <ssg29@cam.ac.uk>
+Developed by [Sung Gong](https://www.obgyn.cam.ac.uk/staff/research-staff/sung-gong/)

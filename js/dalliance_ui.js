@@ -74,10 +74,25 @@
             stylesheet_uri: 'http://www.biodalliance.org/stylesheets/gencode.xml',
             trixURI: '//nectarmutation.org/main/static/POPS.GRCh38.82.cuffcompare.combined.geneName.ix'},
 
-            {name: 'POPS Coverage',
+            {name: 'POPS30 circRNA',
+            desc: 'circular RNAs present in 30% of POPS cohort',
+            bwgURI: '//nectarmutation.org/main/static/circRNA.POPS30.CIRI2.GRCh38.bb',
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'darkgreen', BGCOLOR: 'rgb(117,214,146)', LABEL:'yes'}}]},
+
+            {name: 'POPS novel miRNA',
+            desc: 'novel miRNAs present in at least one sample of POPS cohort',
+            bwgURI: '//nectarmutation.org/main/static/novel.miRNA.GRCh38.merged.bb',
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'orange', BGCOLOR: 'yellow', LABEL:'yes'}}]},
+
+            {name: 'POPS novel small-RNA',
+            desc: 'novel small-RNA present in at least one sample of POPS cohort',
+            bwgURI: '//nectarmutation.org/main/static/novel.smallRNA.GRCh38.merged.bb',
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'navy', BGCOLOR: 'blue', LABEL:'yes'}}]},
+
+            {name: 'POPS total-RNA Coverage',
             desc: 'Total RNA-Seq Coverage of POPS Cohort',
             bwgURI: '//nectarmutation.org/main/static/POPS.GRCh38.82.bw',
-            style: [{type: 'default', style: {glyph: 'HISTOGRAM', BGCOLOR: 'rgb(166,71,71)', HEIGHT: 30, id: 'style1'}}],
+            style: [{type: 'default', style: {glyph: 'HISTOGRAM', BGCOLOR: 'rgb(166,71,71)', HEIGHT: 60, id: 'style1'}}],
             noDownsample: true,
             },
 

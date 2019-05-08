@@ -183,6 +183,10 @@ navbarPage(title="POPS Placenta Transcriptome",
         )
     ),
 
+    #tabPanel(title="Download",
+    #    "To Be Made..."
+    #),
+
     tabPanel("About",
              fluidPage(
                  includeMarkdown("about.md")
