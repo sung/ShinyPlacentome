@@ -5,13 +5,14 @@
 # First created 1/May/2019
 
 library(shiny)
-#library(shinythemes)
+library(shinythemes)
 # Define UI for application that draws a histogram
 
 #load("RData/DEG.RData") # client-side gene selection with selectize
 #gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol # client side list of genes
 
 navbarPage(title="POPS Placenta Transcriptome",
+    theme=shinytheme("sandstone"),
     # below works
 #    withTags({
 #        head(
@@ -28,7 +29,8 @@ navbarPage(title="POPS Placenta Transcriptome",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
-                        # drop down 
+                        helpText("Select differentially expressed genes by a statistical significance level (p-value)"),
+                        # drop down - transcript type
                         selectInput("transcript_pval", 
                                 label="Choose a type of transcript:",
                                 choices = list(
@@ -43,6 +45,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                                             "novel small-RNA"="novel_smallRNA"),
                                 selected="total-RNA:protein_coding"
                         ),
+                        # drop down - pvalue 
                         selectInput("pval", 
                                     label = "Adjusted P-value:", 
                                     choices=list(`<0.1`=0.1,`<0.05`=0.05,`<0.01`=0.01),
@@ -70,6 +73,7 @@ navbarPage(title="POPS Placenta Transcriptome",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
+                        helpText("Select differentially expressed genes within top 5% fold-change calculated by bootstrapping of samples 5000 times"),
                         # drop down 
                         selectInput("transcript_boot", 
                                 label="Choose a type of transcript:",
@@ -92,11 +96,15 @@ navbarPage(title="POPS Placenta Transcriptome",
                     # Show a plot of the generated distribution
                     mainPanel(
                         tabsetPanel(
-                            tabPanel("One third of qualified genes",
-                                     DT::dataTableOutput('deg_boot_oneThird')
+                            tabPanel("PE",
+                                     DT::dataTableOutput('deg_boot_pe_all'),
+                                     hr(),
+                                     DT::dataTableOutput('deg_boot_pe_oneThird')
                             ),
-                            tabPanel("All qualified genes",
-                                     DT::dataTableOutput('deg_boot_all')
+                            tabPanel("SGA",
+                                     DT::dataTableOutput('deg_boot_sga_all'),
+                                     hr(),
+                                     DT::dataTableOutput('deg_boot_sga_oneThird')
                             )
                         )
                     ) # end of mainPanel
@@ -109,6 +117,7 @@ navbarPage(title="POPS Placenta Transcriptome",
         tabPanel("By gene name",
             fluidPage(
                 sidebarLayout(
+                    helpText("Search DEGs by gene names(s) HGNC"),
                     # drop down 
                     sidebarPanel(
                     #    textInput("gene", "Gene Name (HGNC):", "FSTL3") # old-school
@@ -133,6 +142,7 @@ navbarPage(title="POPS Placenta Transcriptome",
         tabPanel("By ENSEMBL ID",
             fluidPage(
                 sidebarLayout(
+                    helpText("Search DEGs by Ensembl ID(s)"),
                     # drop down 
                     sidebarPanel(
                         selectizeInput("ensgs","ENSG ID(s):", choices=NULL, multiple=TRUE) # server side
