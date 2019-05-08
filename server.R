@@ -60,18 +60,18 @@ shinyServer(function(input, output,session) {
     })
 
     output$deg_boot_pe_all <- DT::renderDataTable(
-        DT::datatable(dt.boot.pe()[analysis.type=="all"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from the one third of highly abudant genes", rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.boot.pe()[analysis.type=="all"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from all the qualified genes", rownames = FALSE, filter='top', options = list(pageLength = 15))
     )
 
     output$deg_boot_pe_oneThird <- DT::renderDataTable(
-        DT::datatable(dt.boot.pe()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from all the qualified genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.boot.pe()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
     )
 
     output$deg_boot_sga_all <- DT::renderDataTable(
-        DT::datatable(dt.boot.sga()[analysis.type=="all"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from the one third of highly abudant genes", rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.boot.sga()[analysis.type=="all"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from all the qualified genes", rownames = FALSE, filter='top', options = list(pageLength = 15))
     )
     output$deg_boot_sga_oneThird <- DT::renderDataTable(
-        DT::datatable(dt.boot.sga()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from all the qualified genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.boot.sga()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
     )
 
     output$download_boot<- downloadHandler(
