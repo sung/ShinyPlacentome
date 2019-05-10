@@ -221,7 +221,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                     #verbatimTextOutput("options"),
                     #verbatimTextOutput("test4"),
                     verbatimTextOutput("heatmap_title"),
-                    d3heatmapOutput("heatmap", width="80%", height="1200px"),
+                    d3heatmapOutput("heatmap", width="90%", height="1200px"),
                     hr(),
                     DT::dataTableOutput('tau')
                 ) # end of mainPanel
@@ -234,9 +234,16 @@ navbarPage(title="POPS Placenta Transcriptome",
     #),
 
     tabPanel("About",
-             fluidPage(
-
-                 includeMarkdown("about.md")
-             )
+        fluidPage(
+            fluidRow(
+                column(8,
+                    includeMarkdown("about.md")
+                ),
+                column(4,
+                    a("Tweets by ObsGynae", class="twitter-timeline", "data-theme"="light", "data-link-color"="#19CF86", href="https://twitter.com/ObsGynaeCam?ref_src=twsrc%5Etfw"),
+                    tags$script(src = "https://platform.twitter.com/widgets.js", charset="utf-8")
+                )
+            ) # end of fluidRow
+        )
     )
 )
