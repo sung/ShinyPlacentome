@@ -6,7 +6,9 @@
 
 library(shiny)
 library(shinythemes)
-# Define UI for application that draws a histogram
+library(DT)
+library(markdown) # The ‘includeMarkdown’ function requires the ‘markdown’ package
+library(d3heatmap)
 
 #load("RData/DEG.RData") # client-side gene selection with selectize
 #gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol # client side list of genes
@@ -167,14 +169,15 @@ navbarPage(title="POPS Placenta Transcriptome",
     tabPanel(title="Genome Browser",
         fluidPage(
             #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")) # does not work
-            tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js"), # it works
             #withTags({
             #    head(
             #            script(
             #                src="http://www.biodalliance.org/release-0.13/dalliance-compiled.js"
             #            )
             #    )
-            #}), # this also works!
+            #}), # it works!
+            #tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js"), # it works locally, but not shinyapps.io
+            tags$script(src = "dalliance-compiled.js"), # (www/dalliance-compiled.js) it works both locally and shinyapps.io
 
             includeScript(path = "js/dalliance_ui.js"),
 
@@ -183,12 +186,56 @@ navbarPage(title="POPS Placenta Transcriptome",
         )
     ),
 
+    tabPanel(title="Placenta specific",
+        fluidPage(
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("Browse genes expressed specifically in the placenta"),
+                    # drop down 
+                    selectInput("transcript_tau", 
+                            label="Choose a type of transcript:",
+                            choices = list(
+                                        "protein coding"="protein_coding", 
+                                        "lincRNA"="lincRNA",
+                                        "processed pseudogene"="processed_pseudogene"),
+                            selected="protein_coding"),
+                    # drop down - min FPKM of placenta 
+                    selectInput("pt_fpkm", 
+                                label = "Minimum FPKM of Placenta:", 
+                                choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10),
+                                selected=1),
+                    # a set of radio buttons - transcript type
+                    # tau score range 
+                    sliderInput("tau", label = "Tau score", min = 0.9, max = 1, value = c(0.99,1)),
+                    # drop down - min FPKM of placenta 
+                    selectInput("pt_gtex_fc", 
+                                label = "Fold change of placenta compared with the average of 20 GTEx tissues:", 
+                                choices=list(`>10x`=10,`>100x`=100,`>1000x`=1000),
+                                selected=100),
+                    downloadButton("download_tau", "Download")
+                    # a set of radio buttons - transcript type
+                ),
+        
+                # Show a plot of the generated distribution
+                mainPanel(
+                    #verbatimTextOutput("options"),
+                    #verbatimTextOutput("test4"),
+                    verbatimTextOutput("heatmap_title"),
+                    d3heatmapOutput("heatmap", width="80%", height="1200px"),
+                    hr(),
+                    DT::dataTableOutput('tau')
+                ) # end of mainPanel
+            ) # end of sidebarLayout
+        ) # end of fludPage
+    ), # end of tabPanel
+
     #tabPanel(title="Download",
     #    "To Be Made..."
     #),
 
     tabPanel("About",
              fluidPage(
+
                  includeMarkdown("about.md")
              )
     )
