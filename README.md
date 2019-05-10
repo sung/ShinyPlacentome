@@ -3,6 +3,10 @@
 * Dependencies
 1. DT
 2. data.table
+3. markdown
+4. d3heatmap
+5. RColorBrewer
+6. grDevices
 
 ```R
 # run this command from your R session
