@@ -247,7 +247,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                     #verbatimTextOutput("options"),
                     #verbatimTextOutput("test4"),
                     verbatimTextOutput("heatmap_title"),
-                    d3heatmapOutput("heatmap", width="90%", height="1200px"),
+                    d3heatmapOutput("heatmap", width="95%", height="1200px"),
                     hr(),
                     DT::dataTableOutput('tau')
                 ) # end of mainPanel
