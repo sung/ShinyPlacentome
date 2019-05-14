@@ -13,12 +13,17 @@ load("RData/DEG.RData") # dt.deseq (isa data.table)
                         # dt.boot (isa data.table)
 load("RData/dt.gtex.pt.fpkm.tau.RData") # dt.gtex.pt.fpkm.tau (isa data.table)
 
+#load("RData/dt.pops.tr.RData") # dt.pops.tr # it takes long
+#library(feather) # devtools::install_github("wesm/feather/R") 
+                 # https://blog.rstudio.com/2016/03/29/feather/
+#dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
+load("RData/dl.abundance.RData") # dl.abundance
+
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
-    
-    ##########
-    # Browse #
-    ##########
+    ##############
+    # Browse DEG #
+    ##############
     # 1. by p-value
     dt.deseq.pe<-reactive({
         dt.deseq[tr.type==input$transcript_pval & new.padj.x<as.numeric(input$pval),.(Gene=hgnc_symbol,ID,Count=round(baseMean.x,1),FPKM=round(meanFpkm.x,2),`Log2FC(DESeq2)`=round(log2FoldChange.x,2),`P-val(DESeq2)`=round(pvalue.x,3),`Adjusted P-val`=round(new.padj.x,3))]
@@ -93,10 +98,7 @@ shinyServer(function(input, output,session) {
     ) # end of downloadData
 
     
-    ##########
-    # Search #
-    ##########
-    # By Gene Name(s) 
+    # 3. By Gene Name(s) 
     gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol
     updateSelectizeInput(session, 'genes', choices = gene.names, server = TRUE)
 
@@ -116,7 +118,8 @@ shinyServer(function(input, output,session) {
                         .(`Analysis type`=analysis.type,`Gene`=hgnc_symbol,`ENSG`=ID,"Log2FC(PE vs Control)"=round(log2FC.Boot.x,2),"Log2FC(SGA vs Control)"=round(log2FC.Boot.y,2))]
         )
     })
-    # By ENSG ID (s) 
+
+    # 4. By ENSG ID (s) 
     ensg.ids<-dt.deseq[grepl("^ENSG",ID),.N,ID][order(ID)]$ID#
     updateSelectizeInput(session, 'ensgs', choices = ensg.ids, server = TRUE)
 
@@ -136,6 +139,45 @@ shinyServer(function(input, output,session) {
                         .(`Analysis type`=analysis.type,`Gene`=hgnc_symbol,`ENSG`=ID,"Log2FC(PE vs Control)"=round(log2FC.Boot.x,2),"Log2FC(SGA vs Control)"=round(log2FC.Boot.y,2))]
         )
     })
+
+
+    ###############
+    ## Abundance ##
+    ###############
+    # 1. re-constructred transcriptome
+    dt.abundance<-reactive({
+        if(input$ab_transcript=="circRNA"){
+            if(input$in_polyA){
+                dl.abundance[[input$ab_transcript]][!(`In PolyA+?`) & freq>input$evi.ratio[1] & freq<=input$evi.ratio[2]]
+            }else{
+                dl.abundance[[input$ab_transcript]][freq>input$evi.ratio[1] & freq<=input$evi.ratio[2]]
+            }
+        }else if(input$ab_transcript=="novel_isoform"){
+            num_exon<-ifelse(input$no_single_exon,1,0)
+            dl.abundance[[input$ab_transcript]][exon.cnt>num_exon & FPKM>as.numeric(input$fpkm) & `sample freq`>=input$evi.ratio[1] & `sample freq`<=input$evi.ratio[2],-"class_code"]
+        }else{
+            dl.abundance[[input$ab_transcript]][FPKM>as.numeric(input$fpkm)]
+        }
+    })
+
+    output$pops_tr <- DT::renderDataTable({
+        DT::datatable(dt.abundance(),rownames = FALSE, filter='top', options = list(pageLength = 15))
+    })
+
+    output$download_pops_tr<- downloadHandler(
+        # This function returns a string which tells the client
+        # browser what name to use when saving the file.
+        filename = function() {
+            paste("POPS.transcriptome",input$ab_transcript,"csv.gz", sep = ".")
+        },
+
+        # This function should write data to a file given to it by
+        # the argument 'file'.
+        content = function(file) {
+            # Write to a file specified by the 'file' argument
+            write.csv(dt.abundance(), gzfile(file), row.names = FALSE, quote=F)
+        }
+    ) # end of downloadData
 
     #######################
     ## Placenta-specific ##

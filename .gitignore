@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-*.swp
 rsconnect/*
+RData/dt.pops.*
+*.swp

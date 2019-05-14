@@ -26,6 +26,10 @@ navbarPage(title="POPS Placenta Transcriptome",
 
     #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")), # does not work
 
+    tabPanel("Home",
+        includeMarkdown("home.md")
+    ),
+
     navbarMenu("Browse DEG",
         tabPanel("By P-value",
             fluidPage(
@@ -55,7 +59,6 @@ navbarPage(title="POPS Placenta Transcriptome",
                         # Download button
                         downloadButton("download_pval", "Download")
                     ), # end of sidebarPanel
-            
                     # Show a plot of the generated distribution
                     mainPanel(
                         tabsetPanel(
@@ -94,7 +97,6 @@ navbarPage(title="POPS Placenta Transcriptome",
                         # Download button
                         downloadButton("download_boot", "Download")
                     ), # end of sidebarPanel
-            
                     # Show a plot of the generated distribution
                     mainPanel(
                         tabsetPanel(
@@ -112,11 +114,9 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ) # end of mainPanel
                 ) # end of sidebarLayout
             ) # end of fluidPage
-        ) # end of tabPanel by FC
-    ), # end of navbarMenu DEG
-    
-    navbarMenu("Search",
-        tabPanel("By gene name",
+        ), # end of tabPanel by FC
+
+        tabPanel("By gene names",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
@@ -126,7 +126,6 @@ navbarPage(title="POPS Placenta Transcriptome",
                     #    selectizeInput("genes","Gene Name(s):", choices=gene.names, selected = "FSTL4", multiple=TRUE) # client side
                         selectizeInput("genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
                     ),
-            
                     # Show a plot of the generated distribution
                     mainPanel(
                         tabsetPanel(
@@ -140,8 +139,8 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ) # end of mainPanel
                 )
             )
-        ),
-        tabPanel("By ENSEMBL ID",
+        ), # end of tabPanel - by gene name
+        tabPanel("By ENSEMBL IDs",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
@@ -149,7 +148,6 @@ navbarPage(title="POPS Placenta Transcriptome",
                         # drop down 
                         selectizeInput("ensgs","ENSG ID(s):", choices=NULL, multiple=TRUE) # server side
                     ),
-            
                     # Show a plot of the generated distribution
                     mainPanel(
                         tabsetPanel(
@@ -163,8 +161,99 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ) # end of mainPanel
                 )
             )
-        )
-    ),
+        ) # end of tabPanel by Ensembl
+    ), # end of navbarMenu DEG
+    
+    tabPanel(title="Abundance Level",
+        fluidPage(
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("Browse the transcript abundance level"),
+                    #helpText("Browse the abundance level of potentially novel re-constructed transcripts"),
+                    # drop down 
+                    selectInput("ab_transcript", 
+                            label="Choose a type of transcript:",
+                            choices = list(
+                                        "protein coding"="protein_coding",  # total-RNA
+                                        "lincRNA"="lincRNA",                # total-RNA
+                                        "pseudogene"="pseudogene",          # total-RNA
+                                        "circRNA"="circRNA",
+                                        "miRNA"="miRNA",
+                                        "piRNA"="piRNA",
+                                        "novel transcript isoforms"="novel_isoform",
+                                        "novel miRNA"="novel_miRNA",
+                                        "novel small-RNA"="novel_smallRNA"),
+                            selected="protein_coding"),
+                    # conditional drop down - min FPKM of placenta (except circRNA)
+                    conditionalPanel(
+                        condition="input.ab_transcript != 'circRNA'",
+                        selectInput("fpkm", 
+                                    label = "Minimum FPKM:", 
+                                    choices=list(`>0.01`=0.01,`>0.1`=0.1,`>1`=1,`>5`=5,`>10`=10),
+                                    selected=1)),
+                    # conditional radio button - polyA+ or not (circRNA only)
+                    conditionalPanel(
+                        condition="input.ab_transcript == 'circRNA'",
+                        checkboxInput("in_polyA", label = "EXCLUDE circRNA found in polyA+ data?", value = TRUE)),
+                    # conditional no. of exon - only for novel_isoform
+                    conditionalPanel(
+                        condition="input.ab_transcript == 'novel_isoform'",
+                        checkboxInput("no_single_exon", label = "EXCLUDE single-exon transcript?", value = TRUE)),
+                    # conditional sample frequency range (only for circRNA, novel_isoform)
+                    conditionalPanel(
+                        condition="input.ab_transcript == 'novel_isoform' | input.ab_transcript =='circRNA'",
+                        sliderInput("evi.ratio", label = "Transcript present in following sample frequency range", min = 0, max = 1, value = c(0.3,1))),
+                    downloadButton("download_pops_tr", "Download")
+                    # a set of radio buttons - transcript type
+                ),
+                # Show a plot of the generated distribution
+                mainPanel(
+                    DT::dataTableOutput('pops_tr')
+                ) # end of mainPanel
+            ) # end of sidebarLayout
+        ) # end of fludPage
+    ), # end of tabPanel - reconstructed transcriptome
+
+    tabPanel(title="Placenta specific",
+        fluidPage(
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("Browse genes expressed specifically in the placenta"),
+                    # drop down 
+                    selectInput("transcript_tau", 
+                            label="Choose a type of transcript:",
+                            choices = list(
+                                        "protein coding"="protein_coding", 
+                                        "lincRNA"="lincRNA",
+                                        "processed pseudogene"="processed_pseudogene")),
+                    # drop down - min FPKM of placenta 
+                    selectInput("pt_fpkm", 
+                                label = "Minimum FPKM of Placenta:", 
+                                choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10),
+                                selected=1),
+                    # a set of radio buttons - transcript type
+                    # tau score range 
+                    sliderInput("tau", label = "Tau score", min = 0.9, max = 1, value = c(0.99,1)),
+                    # drop down - min FPKM of placenta 
+                    selectInput("pt_gtex_fc", 
+                                label = "Fold change of placenta compared with the average of 20 GTEx tissues:", 
+                                choices=list(`>10x`=10,`>100x`=100,`>1000x`=1000),
+                                selected=100),
+                    downloadButton("download_tau", "Download")
+                    # a set of radio buttons - transcript type
+                ),
+                # Show a plot of the generated distribution
+                mainPanel(
+                    #verbatimTextOutput("options"),
+                    #verbatimTextOutput("test4"),
+                    verbatimTextOutput("heatmap_title"),
+                    d3heatmapOutput("heatmap", width="90%", height="1200px"),
+                    hr(),
+                    DT::dataTableOutput('tau')
+                ) # end of mainPanel
+            ) # end of sidebarLayout
+        ) # end of fludPage
+    ), # end of tabPanel
 
     tabPanel(title="Genome Browser",
         fluidPage(
@@ -185,49 +274,6 @@ navbarPage(title="POPS Placenta Transcriptome",
             #tags$script(HTML("if (window.innerHeight < 400) alert('Screen too small');"))
         )
     ),
-
-    tabPanel(title="Placenta specific",
-        fluidPage(
-            sidebarLayout(
-                sidebarPanel(
-                    helpText("Browse genes expressed specifically in the placenta"),
-                    # drop down 
-                    selectInput("transcript_tau", 
-                            label="Choose a type of transcript:",
-                            choices = list(
-                                        "protein coding"="protein_coding", 
-                                        "lincRNA"="lincRNA",
-                                        "processed pseudogene"="processed_pseudogene"),
-                            selected="protein_coding"),
-                    # drop down - min FPKM of placenta 
-                    selectInput("pt_fpkm", 
-                                label = "Minimum FPKM of Placenta:", 
-                                choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10),
-                                selected=1),
-                    # a set of radio buttons - transcript type
-                    # tau score range 
-                    sliderInput("tau", label = "Tau score", min = 0.9, max = 1, value = c(0.99,1)),
-                    # drop down - min FPKM of placenta 
-                    selectInput("pt_gtex_fc", 
-                                label = "Fold change of placenta compared with the average of 20 GTEx tissues:", 
-                                choices=list(`>10x`=10,`>100x`=100,`>1000x`=1000),
-                                selected=100),
-                    downloadButton("download_tau", "Download")
-                    # a set of radio buttons - transcript type
-                ),
-        
-                # Show a plot of the generated distribution
-                mainPanel(
-                    #verbatimTextOutput("options"),
-                    #verbatimTextOutput("test4"),
-                    verbatimTextOutput("heatmap_title"),
-                    d3heatmapOutput("heatmap", width="90%", height="1200px"),
-                    hr(),
-                    DT::dataTableOutput('tau')
-                ) # end of mainPanel
-            ) # end of sidebarLayout
-        ) # end of fludPage
-    ), # end of tabPanel
 
     #tabPanel(title="Download",
     #    "To Be Made..."
