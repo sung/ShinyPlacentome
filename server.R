@@ -98,44 +98,44 @@ shinyServer(function(input, output,session) {
     ) # end of downloadData
 
     
-    # 3. By Gene Name(s) 
-    gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol
-    updateSelectizeInput(session, 'genes', choices = gene.names, server = TRUE)
+    # 3. DEG - By Gene Name(s) 
+    deg.gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol
+    updateSelectizeInput(session, 'deg_genes', choices = deg.gene.names, server = TRUE)
 
     output$deg_gene_pval <- DT::renderDataTable({
         DT::datatable(
             rbind(
-                dt.deseq[hgnc_symbol %in% input$genes,
+                dt.deseq[hgnc_symbol %in% input$deg_genes,
                          .(`Subject`="PE",`Gene`=hgnc_symbol, `ENSG`=ID,Count=round(baseMean.x,1),FPKM=round(meanFpkm.x,2),`Log2FC(DESeq2)`=round(log2FoldChange.x,2),`P-val(DESeq2)`=round(pvalue.x,3),`Adjusted P-val`=round(new.padj.x,3))], 
-                dt.deseq[hgnc_symbol %in% input$genes,
+                dt.deseq[hgnc_symbol %in% input$deg_genes,
                          .(`Subject`="SGA",`Gene`=hgnc_symbol, `ENSG`=ID,Count=round(baseMean.y,1),FPKM=round(meanFpkm.y,2),`Log2FC(DESeq2)`=round(log2FoldChange.y,2),`P-val(DESeq2)`=round(pvalue.y,3),`Adjusted P-val`=round(new.padj.y,3))]
                 )
         )
     })
     output$deg_gene_boot <- DT::renderDataTable({
         DT::datatable(
-                dt.boot[hgnc_symbol %in% input$genes,
+                dt.boot[hgnc_symbol %in% input$deg_genes,
                         .(`Analysis type`=analysis.type,`Gene`=hgnc_symbol,`ENSG`=ID,"Log2FC(PE vs Control)"=round(log2FC.Boot.x,2),"Log2FC(SGA vs Control)"=round(log2FC.Boot.y,2))]
         )
     })
 
-    # 4. By ENSG ID (s) 
+    # 4. DEG - By ENSG ID (s) 
     ensg.ids<-dt.deseq[grepl("^ENSG",ID),.N,ID][order(ID)]$ID#
-    updateSelectizeInput(session, 'ensgs', choices = ensg.ids, server = TRUE)
+    updateSelectizeInput(session, 'deg_ensgs', choices = ensg.ids, server = TRUE)
 
     output$deg_ensg_pval <- DT::renderDataTable({
         DT::datatable(
             rbind(
-                dt.deseq[ID %in% input$ensgs,
+                dt.deseq[ID %in% input$deg_ensgs,
                          .(`Subject`="PE",`Gene`=hgnc_symbol, `ENSG`=ID,Count=round(baseMean.x,1),FPKM=round(meanFpkm.x,2),`Log2FC(DESeq2)`=round(log2FoldChange.x,2),`P-val(DESeq2)`=round(pvalue.x,3),`Adjusted P-val`=round(new.padj.x,3))], 
-                dt.deseq[ID %in% input$ensgs,
+                dt.deseq[ID %in% input$deg_ensgs,
                          .(`Subject`="SGA",`Gene`=hgnc_symbol, `ENSG`=ID,Count=round(baseMean.y,1),FPKM=round(meanFpkm.y,2),`Log2FC(DESeq2)`=round(log2FoldChange.y,2),`P-val(DESeq2)`=round(pvalue.y,3),`Adjusted P-val`=round(new.padj.y,3))]
                 )
         )
     })
     output$deg_ensg_boot <- DT::renderDataTable({
         DT::datatable(
-                dt.boot[ID %in% input$ensgs,
+                dt.boot[ID %in% input$deg_ensgs,
                         .(`Analysis type`=analysis.type,`Gene`=hgnc_symbol,`ENSG`=ID,"Log2FC(PE vs Control)"=round(log2FC.Boot.x,2),"Log2FC(SGA vs Control)"=round(log2FC.Boot.y,2))]
         )
     })
@@ -182,12 +182,12 @@ shinyServer(function(input, output,session) {
     #######################
     ## Placenta-specific ##
     #######################
-    #output$options<- renderPrint({ paste(input$transcript_tau, input$pt_fpkm, input$tau[1], input$tau[2], input$pt_gtex_fc)})
+    #output$options<- renderPrint({ paste(input$transcript_tau, input$pt_fpkm1, input$tau[1], input$tau[2], input$pt_gtex_fc)})
     #output$test4<- renderPrint({ lapply(input, class)})
-
+    # 1. tau-based
     dt.tau<-reactive({
-            dt.gtex.pt.fpkm.tau[!grepl("^HIST",hgnc_symbol) & hgnc_symbol!="RMRP" &
-                                gene_biotype==input$transcript_tau &  Placenta>as.numeric(input$pt_fpkm) & Tau>input$tau[1] & Tau<=input$tau[2] & Placenta/meanFpkmGTEx > as.numeric(input$pt_gtex_fc)]
+        dt.gtex.pt.fpkm.tau[!grepl("^HIST",hgnc_symbol) & hgnc_symbol!="RMRP" &
+                            gene_biotype==input$transcript_tau &  Placenta>as.numeric(input$pt_fpkm1) & Tau>input$tau[1] & Tau<=input$tau[2] & Placenta/meanFpkmGTEx > as.numeric(input$pt_gtex_fc)]
     })
 
     row.num<-reactive({
@@ -236,5 +236,43 @@ shinyServer(function(input, output,session) {
         )
     })
 
+    # 2. ALL or by Gene Name(s) 
+    gtex.gene.names<-dt.gtex.pt.fpkm.tau[,.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol
+    updateSelectizeInput(session, 'gtex_genes', choices = gtex.gene.names, server = TRUE)
 
+    dt.gtex<-reactive({
+        if(input$radio_gtex==1){
+            dt.gtex.pt.fpkm.tau[Placenta > as.numeric(input$pt_fpkm2)][order(-Placenta)]
+        }else{
+            dt.foo<-melt.data.table(dt.gtex.pt.fpkm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanFpkmGTEx","Tau")],
+                            id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="FPKM")
+            dt.foo[,`Source`:=ifelse(Tissue=="Placenta","POPS","GTEx")][order(hgnc_symbol,-Source,-FPKM)]
+        }
+    })
+
+    output$gtex_fpkm <- DT::renderDataTable({
+        DT::datatable(dt.gtex(), caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 21))
+    })
+
+    output$download_gtex<- downloadHandler(
+        # This function returns a string which tells the client
+        # browser what name to use when saving the file.
+        filename = function() {
+            if(input$radio_gtex==1){
+                paste("FPKM.GTEx.vs.placenta.more.than",input$pt_fpkm2,"FPKM.csv.gz", sep = ".")
+            }else{
+                "FPKM.GTEx.vs.placenta.csv"
+            }
+        },
+        # This function should write data to a file given to it by
+        # the argument 'file'.
+        content = function(file) {
+            # Write to a file specified by the 'file' argument
+            if(input$radio_gtex==1){
+                write.csv(dt.gtex(), gzfile(file), row.names = FALSE, quote=F)
+            }else{
+                write.csv(dt.gtex(), file, row.names = FALSE, quote=F)
+            }
+        }
+    ) # end of downloadData
 })

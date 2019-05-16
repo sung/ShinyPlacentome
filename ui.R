@@ -123,8 +123,8 @@ navbarPage(title="POPS Placenta Transcriptome",
                         helpText("Search DEGs by gene names(s) HGNC"),
                     # drop down 
                     #    textInput("gene", "Gene Name (HGNC):", "FSTL3") # old-school
-                    #    selectizeInput("genes","Gene Name(s):", choices=gene.names, selected = "FSTL4", multiple=TRUE) # client side
-                        selectizeInput("genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
+                    #    selectizeInput("deg_genes","Gene Name(s):", choices=gene.names, selected = "FSTL4", multiple=TRUE) # client side
+                        selectizeInput("deg_genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
                     ),
                     # Show a plot of the generated distribution
                     mainPanel(
@@ -146,7 +146,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                     sidebarPanel(
                         helpText("Search DEGs by Ensembl ID(s)"),
                         # drop down 
-                        selectizeInput("ensgs","ENSG ID(s):", choices=NULL, multiple=TRUE) # server side
+                        selectizeInput("deg_ensgs","ENSG ID(s):", choices=NULL, multiple=TRUE) # server side
                     ),
                     # Show a plot of the generated distribution
                     mainPanel(
@@ -191,7 +191,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                                     label = "Minimum FPKM:", 
                                     choices=list(`>0.01`=0.01,`>0.1`=0.1,`>1`=1,`>5`=5,`>10`=10),
                                     selected=1)),
-                    # conditional radio button - polyA+ or not (circRNA only)
+                    # conditional select button - polyA+ or not (circRNA only)
                     conditionalPanel(
                         condition="input.ab_transcript == 'circRNA'",
                         checkboxInput("in_polyA", label = "EXCLUDE circRNA found in polyA+ data?", value = TRUE)),
@@ -204,7 +204,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         condition="input.ab_transcript == 'novel_isoform' | input.ab_transcript =='circRNA'",
                         sliderInput("evi.ratio", label = "Transcript present in following sample frequency range", min = 0, max = 1, value = c(0.3,1))),
                     downloadButton("download_pops_tr", "Download")
-                    # a set of radio buttons - transcript type
+                    # a set of slide
                 ),
                 # Show a plot of the generated distribution
                 mainPanel(
@@ -214,46 +214,79 @@ navbarPage(title="POPS Placenta Transcriptome",
         ) # end of fludPage
     ), # end of tabPanel - reconstructed transcriptome
 
-    tabPanel(title="Placenta specific",
-        fluidPage(
-            sidebarLayout(
-                sidebarPanel(
-                    helpText("Browse genes expressed specifically in the placenta"),
-                    # drop down 
-                    selectInput("transcript_tau", 
-                            label="Choose a type of transcript:",
-                            choices = list(
-                                        "protein coding"="protein_coding", 
-                                        "lincRNA"="lincRNA",
-                                        "processed pseudogene"="processed_pseudogene")),
-                    # drop down - min FPKM of placenta 
-                    selectInput("pt_fpkm", 
-                                label = "Minimum FPKM of Placenta:", 
-                                choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10),
-                                selected=1),
-                    # a set of radio buttons - transcript type
-                    # tau score range 
-                    sliderInput("tau", label = "Tau score", min = 0.9, max = 1, value = c(0.99,1)),
-                    # drop down - min FPKM of placenta 
-                    selectInput("pt_gtex_fc", 
-                                label = "Fold change of placenta compared with the average of 20 GTEx tissues:", 
-                                choices=list(`>10x`=10,`>100x`=100,`>1000x`=1000),
-                                selected=100),
-                    downloadButton("download_tau", "Download")
-                    # a set of radio buttons - transcript type
-                ),
-                # Show a plot of the generated distribution
-                mainPanel(
-                    #verbatimTextOutput("options"),
-                    #verbatimTextOutput("test4"),
-                    verbatimTextOutput("heatmap_title"),
-                    d3heatmapOutput("heatmap", width="95%", height="1200px"),
-                    hr(),
-                    DT::dataTableOutput('tau')
-                ) # end of mainPanel
-            ) # end of sidebarLayout
-        ) # end of fludPage
-    ), # end of tabPanel
+    navbarMenu("Placenta vs. GTEx",
+        tabPanel(title="Placenta specific",
+            fluidPage(
+                sidebarLayout(
+                    sidebarPanel(
+                        helpText("Browse genes expressed specifically in the placenta"),
+                        # drop down 
+                        selectInput("transcript_tau", 
+                                label="Choose a type of transcript:",
+                                choices = list(
+                                            "protein coding"="protein_coding", 
+                                            "lincRNA"="lincRNA",
+                                            "processed pseudogene"="processed_pseudogene")),
+                        # drop down - min FPKM of placenta 
+                        selectInput("pt_fpkm1", 
+                                    label = "Minimum FPKM of Placenta:", 
+                                    choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10),
+                                    selected=1),
+                        # a set of radio buttons - transcript type
+                        # tau score range 
+                        sliderInput("tau", label = a("Tau score",href="https://academic.oup.com/bib/article/18/2/205/2562739",target="_blank"), min = 0.9, max = 1, value = c(0.99,1)),
+                        # drop down - min FPKM of placenta 
+                        selectInput("pt_gtex_fc", 
+                                    label = "Fold change of placenta compared with the average of 20 GTEx tissues:", 
+                                    choices=list(`>10x`=10,`>100x`=100,`>1000x`=1000),
+                                    selected=100),
+                        downloadButton("download_tau", "Download")
+                        # a set of radio buttons - transcript type
+                    ),
+                    # Show a plot of the generated distribution
+                    mainPanel(
+                        #verbatimTextOutput("options"),
+                        #verbatimTextOutput("test4"),
+                        verbatimTextOutput("heatmap_title"),
+                        d3heatmapOutput("heatmap", width="95%", height="1200px"),
+                        hr(),
+                        DT::dataTableOutput('tau')
+                    ) # end of mainPanel
+                ) # end of sidebarLayout
+            ) # end of fludPage
+        ), # end of tabPanel
+
+        tabPanel("genes of your interests",
+            fluidPage(
+                sidebarLayout(
+                    sidebarPanel(
+                        helpText("Tissue-wide comparision of abundance level"),
+                        # radio button
+                        radioButtons("radio_gtex", label ="List all or search genes of your interests",
+                            choices = list("All" = 1, "Gene(s) of your interests" = 2), 
+                            selected = 1),
+                        # drop down - min FPKM of placenta 
+                        conditionalPanel(
+                            condition="input.radio_gtex==1",
+                            selectInput("pt_fpkm2", 
+                                        label = "Minimum FPKM of Placenta:", 
+                                        choices=list(`>0`=0,`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
+                                        selected=1)
+                        ),
+                        conditionalPanel(
+                            condition="input.radio_gtex==2",
+                            selectizeInput("gtex_genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
+                        ),
+                        downloadButton("download_gtex", "Download")
+                    ),
+                    # Show a plot of the generated distribution
+                    mainPanel(
+                        DT::dataTableOutput('gtex_fpkm')
+                    ) # end of mainPanel
+                )
+            )
+        ) # end of tabPanel - by gene name
+    ), # end of navbarMenu
 
     tabPanel(title="Genome Browser",
         fluidPage(
