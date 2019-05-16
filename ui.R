@@ -164,7 +164,7 @@ navbarPage(title="POPS Placenta Transcriptome",
         ) # end of tabPanel by Ensembl
     ), # end of navbarMenu DEG
     
-    tabPanel(title="Abundance Level",
+    tabPanel(title="Browse Transcript",
         fluidPage(
             sidebarLayout(
                 sidebarPanel(
