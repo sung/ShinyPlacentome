@@ -140,6 +140,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                 )
             )
         ), # end of tabPanel - by gene name
+
         tabPanel("By ENSEMBL IDs",
             fluidPage(
                 sidebarLayout(
@@ -212,7 +213,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                 ) # end of mainPanel
             ) # end of sidebarLayout
         ) # end of fludPage
-    ), # end of tabPanel - reconstructed transcriptome
+    ), # end of tabPanel - Browse Transcript
 
     navbarMenu("Placenta vs. GTEx",
         tabPanel(title="Placenta specific",
@@ -254,7 +255,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ) # end of mainPanel
                 ) # end of sidebarLayout
             ) # end of fludPage
-        ), # end of tabPanel
+        ), # end of tabPanel placenta-specific
 
         tabPanel("genes of your interests",
             fluidPage(
@@ -276,8 +277,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         conditionalPanel(
                             condition="input.radio_gtex==2",
                             selectizeInput("gtex_genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
-                        ),
-                        downloadButton("download_gtex", "Download")
+                        )
                     ),
                     # Show a plot of the generated distribution
                     mainPanel(
@@ -285,8 +285,63 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ) # end of mainPanel
                 )
             )
-        ) # end of tabPanel - by gene name
-    ), # end of navbarMenu
+        ), # end of tabPanel - by gene name
+
+        tabPanel("Not in placenta",
+            fluidPage(
+                sidebarLayout(
+                    sidebarPanel(
+                        helpText(h3("Browse genes not specifically expressed in the placneta")),
+                        # checkbox of tissues to exclude
+                        checkboxGroupInput("no_gtex_tissue", 
+                                      label = "EXCLUDE following tissues from GTEx", 
+                                      choices=gtex_tissues,
+                                      selected=c("Blood","Breast")
+                                      ),
+                        # drop down 
+                        selectInput("transcript_not_in_pt", 
+                                label="Choose a type of transcript:",
+                                choices = list("protein coding"="protein_coding", "lincRNA"="lincRNA"),
+                                selected="protein_coding"),
+                        # checkbox
+                        conditionalPanel(
+                            condition="input.transcript_not_in_pt== 'protein_coding'",
+                            checkboxInput("no_ribosomal", label = "EXCLUDE ribosomal protein?", value = TRUE)),
+                        # drop down - min baseMean
+                        selectInput("min_gtex_count", 
+                                    label = "Minimum Read Count per tissue:", 
+                                    choices=list(`>10`=10,`>20`=20,`>50`=50, `>100`=100),
+                                    selected=10),
+                        # drop down - min FPKM of GTEx 
+                        selectInput("min_gtex_fpkm", 
+                                    label = "Minimum FPKM of non-placental tissues:", 
+                                    choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
+                                    selected=1),
+                        # drop down - min FPKM of placenta 
+                        selectInput("gtex_pt_fc", 
+                                    label = "Fold change of a non-placenta tissue compared with the placenta (Minimum FPKM (non-placenta) / FPKM (Placenta)):", 
+                                    choices=list(`>2x`=2,`>5x`=5,`>10x`=10,`>100x`=100),
+                                    selected=5),
+                        downloadButton("download_not_in_pt", "Download")
+                    ), # end of sidebarPanel
+                    # Show a plot of the generated distribution
+                    mainPanel(
+                        tabsetPanel(
+                            tabPanel("Rank",
+                                     DT::dataTableOutput('not_in_placenta')
+                                    #d3heatmapOutput("heatmap_not_in_pt", width="95%", height="1200px")
+                            ),
+                            tabPanel("GO annotation",
+                                     DT::dataTableOutput('not_in_placenta_go')
+                            )
+                        )
+                    ) # end of mainPanel
+                ) # end of sidebarLayout
+            ) # end of fluidPage
+        ) # end of tabPanel - not in placenta 
+
+    ), # end of navbarMenu (Placenta vs GTEx)
+
 
     tabPanel(title="Genome Browser",
         fluidPage(

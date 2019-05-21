@@ -17,7 +17,12 @@ load("RData/dt.gtex.pt.fpkm.tau.RData") # dt.gtex.pt.fpkm.tau (isa data.table)
 #library(feather) # devtools::install_github("wesm/feather/R") 
                  # https://blog.rstudio.com/2016/03/29/feather/
 #dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
-load("RData/dl.abundance.RData") # dl.abundance
+load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R
+                                 # dl.abundance
+
+
+load("RData/dt.gtex.fpkm.RData") # 19M
+load("RData/dt.ensg.desc.2019-05-20.RData") # 1.3M
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
@@ -144,7 +149,7 @@ shinyServer(function(input, output,session) {
     ###############
     ## Abundance ##
     ###############
-    # 1. re-constructred transcriptome
+    # 1. prepare data.table 
     dt.abundance<-reactive({
         if(input$ab_transcript=="circRNA"){
             if(input$in_polyA){
@@ -160,10 +165,12 @@ shinyServer(function(input, output,session) {
         }
     })
 
+    # 2. render data.table
     output$pops_tr <- DT::renderDataTable({
         DT::datatable(dt.abundance(),rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
+    # 3. download bits
     output$download_pops_tr<- downloadHandler(
         # This function returns a string which tells the client
         # browser what name to use when saving the file.
@@ -178,6 +185,13 @@ shinyServer(function(input, output,session) {
             write.csv(dt.abundance(), gzfile(file), row.names = FALSE, quote=F)
         }
     ) # end of downloadData
+
+    # 4. ggbio for the Manhattan plot
+    gr.abundance<-reactive({
+        dt.manhattan<-dt.abundance()
+        dt.manhattan[,`score`:=ifelse(Type=="circRNA",meanCount/10^3,meanFpkm/10^6)]
+        GenomicRanges::makeGRangesFromDataFrame(dt.manhattan,keep.extra.columns=T)
+    })
 
     #######################
     ## Placenta-specific ##
@@ -275,4 +289,75 @@ shinyServer(function(input, output,session) {
             }
         }
     ) # end of downloadData
+
+    #####################
+    ## Not in Placenta ##
+    #####################
+    dt.gtex.rank<-reactive({
+        dt.gtex.desc<-merge(
+                    dt.gtex.fpkm[!Tissue %in% input$no_gtex_tissue & baseMean > as.numeric(input$min_gtex_count)],
+                    dt.ensg.desc[!chromosome_name %in% c("Y","MT") & gene_biotype==input$transcript_not_in_pt]
+                       )
+        my.ensg<-dt.gtex.desc[,.N,ensembl_gene_id][N==length(gtex_tissues)+1-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
+        dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue & ensembl_gene_id %in% my.ensg,.(Tissue,meanFpkm,rank=length(gtex_tissues)+1-length(input$no_gtex_tissue)+1 -rank(meanFpkm)),.(ensembl_gene_id,hgnc_symbol,description)][order(ensembl_gene_id,rank)] 
+
+        if(input$no_ribosomal){
+            dt.pt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+        }else{
+            dt.pt.bottom<-dt.gtex.rank[rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+        }
+
+        #dt.gtex.rank[ensembl_gene_id %in% dt.pt.bottom$ensembl_gene_id][order(ensembl_gene_id,rank)]
+
+        # apply min FPKM of GTEx  & min FC
+        dt.foo<-dcast.data.table(dt.gtex.rank[ensembl_gene_id %in% dt.pt.bottom$ensembl_gene_id & rank>=length(gtex_tissues)-length(input$no_gtex_tissue)], ensembl_gene_id+hgnc_symbol~rank, value.var="meanFpkm"); setnames(dt.foo,c("ensembl_gene_id","hgnc_symbol","GTEx_bottom","Placenta"))
+        
+        my.ensg2<-dt.foo[GTEx_bottom>as.numeric(input$min_gtex_fpkm) & GTEx_bottom/Placenta>as.numeric(input$gtex_pt_fc)]$ensembl_gene_id
+
+        dt.gtex.rank[ensembl_gene_id %in% my.ensg2][order(ensembl_gene_id,rank)]
+    })
+
+
+    dt.gtex.rank.go<-reactive({
+        data.table(biomaRt::getBM(attributes =c("ensembl_gene_id","hgnc_symbol","description","go_id","name_1006"), 
+                                              filters = "ensembl_gene_id", 
+                                              values = dt.gtex.rank()[,.N,ensembl_gene_id]$ensembl_gene_id,
+                                              mart=biomaRt::useMart(biomart = "ensembl", dataset="hsapiens_gene_ensembl")
+                                              ))
+    })
+
+    output$not_in_placenta<- DT::renderDataTable({
+        DT::datatable(dt.gtex.rank()[,-"description"], rownames = FALSE, filter='top', options = list(pageLength = length(gtex_tissues)+1-length(input$no_gtex_tissue)))
+    })
+
+    output$not_in_placenta_go<- DT::renderDataTable({
+        DT::datatable(dt.gtex.rank.go(), rownames = FALSE, filter='top', 
+                      options = list(searchHighlight = TRUE, search = list(regex = FALSE, caseInsensitive = TRUE, search = 'DNA repair'), pageLength = 15))
+    })
+
+    if(FALSE){
+        row.num.not.in.pt<-reactive({
+            ifelse(nrow(dt.gtex.rank())>50,50,nrow(dt.gtex.rank()))
+        })
+
+        mat.gtex.rank<-reactive({
+            dt.gtex.rank<-dcast.data.table(dt.gtex.rank(), hgnc_symbol~Tissue, value.var="meanFpkm")
+            mat.not.in.pt<-as.matrix(dt.gtex.rank[,-c("hgnc_symbol")])[1:row.num.not.in.pt(),]
+            mat.not.in.pt<-log10(mat.not.in.pt+0.001)
+            colnames(mat.not.in.pt)<-gsub("_"," ",colnames(mat.not.in.pt))
+            rownames(mat.not.in.pt)<-dt.gtex.rank[1:row.num()]$hgnc_symbol
+            return(mat.not.in.pt)
+        })
+
+        output$heatmap_not_in_pt <- renderD3heatmap({
+            d3heatmap(
+                mat.gtex.rank(),
+                cellnote=dcast.data.table(dt.gtex.rank(), hgnc_symbol~Tissue, value.var="meanFpkm")[1:row.num.not.in.pt()],
+                dendrogram = "column",
+                xaxis_font_size = "10pt",
+                colors = grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name="RdYlBu")))(100) 
+            )
+        })
+    }
+
 })
