@@ -293,71 +293,64 @@ shinyServer(function(input, output,session) {
     #####################
     ## Not in Placenta ##
     #####################
-    dt.gtex.rank<-reactive({
-        dt.gtex.desc<-merge(
-                    dt.gtex.fpkm[!Tissue %in% input$no_gtex_tissue & baseMean > as.numeric(input$min_gtex_count)],
-                    dt.ensg.desc[!chromosome_name %in% c("Y","MT") & gene_biotype==input$transcript_not_in_pt]
-                       )
-        my.ensg<-dt.gtex.desc[,.N,ensembl_gene_id][N==length(gtex_tissues)+1-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
-        dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue & ensembl_gene_id %in% my.ensg,.(Tissue,meanFpkm,rank=length(gtex_tissues)+1-length(input$no_gtex_tissue)+1 -rank(meanFpkm)),.(ensembl_gene_id,hgnc_symbol,description)][order(ensembl_gene_id,rank)] 
-
+    # 20 GTEx tissue + 'Placenta'
+    # By deault, n=2('Breast' AND 'Blood') omiited from 20 GTEx
+    dt.pt.bottom<-reactive({
+        dt.gtex.desc<-merge(dt.gtex.fpkm,dt.ensg.desc)
+        my.ensg<-dt.gtex.desc[!Tissue %in% c("Placenta",input$no_gtex_tissue)
+                              & baseMean > as.numeric(input$min_gtex_count)
+                              & !chromosome_name %in% c("Y","MT")
+                              & gene_biotype==input$transcript_not_in_pt
+                              ,.N,ensembl_gene_id][N==length(gtex_tissues)-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
+        dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue 
+                                   & ensembl_gene_id %in% my.ensg
+                                   ,.(Tissue,meanFpkm,rank=length(gtex_tissues)+1-length(input$no_gtex_tissue)+1 -rank(meanFpkm))
+                                   ,.(ensembl_gene_id,hgnc_symbol,description)][order(ensembl_gene_id,rank)] 
         if(input$no_ribosomal){
-            dt.pt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+            dt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
         }else{
-            dt.pt.bottom<-dt.gtex.rank[rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+            dt.bottom<-dt.gtex.rank[rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
         }
-
-        #dt.gtex.rank[ensembl_gene_id %in% dt.pt.bottom$ensembl_gene_id][order(ensembl_gene_id,rank)]
-
-        # apply min FPKM of GTEx  & min FC
-        dt.foo<-dcast.data.table(dt.gtex.rank[ensembl_gene_id %in% dt.pt.bottom$ensembl_gene_id & rank>=length(gtex_tissues)-length(input$no_gtex_tissue)], ensembl_gene_id+hgnc_symbol~rank, value.var="meanFpkm"); setnames(dt.foo,c("ensembl_gene_id","hgnc_symbol","GTEx_bottom","Placenta"))
-        
-        my.ensg2<-dt.foo[GTEx_bottom>as.numeric(input$min_gtex_fpkm) & GTEx_bottom/Placenta>as.numeric(input$gtex_pt_fc)]$ensembl_gene_id
-
-        dt.gtex.rank[ensembl_gene_id %in% my.ensg2][order(ensembl_gene_id,rank)]
+        # genes where the placenta ranked at the bottom
+        dt.gtex.rank[ensembl_gene_id %in% dt.bottom$ensembl_gene_id][order(ensembl_gene_id,rank)]
     })
 
+    # apply min FPKM of GTEx  & min FC
+    dt.pt.bottom.summary<-reactive({
+        dt.pt.bottom<-dt.pt.bottom()
+        # get min,max,mean,median of the genes above
+        dt.pt.bottom.summary<-merge(
+                    dt.pt.bottom[Tissue!="Placenta",
+                                .(`GTEx_minFPKM`=round(min(meanFpkm),3),`GTEx_maxFPKM`=round(max(meanFpkm),3),`GTEx_medianFPKM`=round(median(meanFpkm),3),`GTEx_meanFPKM`=round(mean(meanFpkm),3)),
+                                .(ensembl_gene_id,hgnc_symbol,description)],
+                    dt.pt.bottom[Tissue=="Placenta",.(ensembl_gene_id,`Placenta_meanFPKM`=round(meanFpkm,3))]
+                    )[order(Placenta_meanFPKM)]
+        dt.pt.bottom.summary[GTEx_minFPKM>as.numeric(input$min_gtex_fpkm) & GTEx_minFPKM/Placenta_meanFPKM>as.numeric(input$min_gtex_fc)]
+    })
 
-    dt.gtex.rank.go<-reactive({
+    dt.pt.bottom.rank<-reactive({
+        dt.pt.bottom()[ensembl_gene_id %in% dt.pt.bottom.summary()$ensembl_gene_id][order(ensembl_gene_id,rank)]
+    })
+
+    dt.pt.bottom.go<-reactive({
         data.table(biomaRt::getBM(attributes =c("ensembl_gene_id","hgnc_symbol","description","go_id","name_1006"), 
                                               filters = "ensembl_gene_id", 
-                                              values = dt.gtex.rank()[,.N,ensembl_gene_id]$ensembl_gene_id,
+                                              values = dt.pt.bottom.summary()$ensembl_gene_id,
                                               mart=biomaRt::useMart(biomart = "ensembl", dataset="hsapiens_gene_ensembl")
                                               ))
     })
 
-    output$not_in_placenta<- DT::renderDataTable({
-        DT::datatable(dt.gtex.rank()[,-"description"], rownames = FALSE, filter='top', options = list(pageLength = length(gtex_tissues)+1-length(input$no_gtex_tissue)))
+    output$not_in_placenta_summary<- DT::renderDataTable({
+        DT::datatable(dt.pt.bottom.summary(), rownames = FALSE, filter='top', options = list(pageLength = 15))
+    })
+
+    output$not_in_placenta_rank<- DT::renderDataTable({
+        DT::datatable(dt.pt.bottom.rank()[,-"description"], rownames = FALSE, filter='top', options = list(pageLength = length(gtex_tissues)+1-length(input$no_gtex_tissue)))
     })
 
     output$not_in_placenta_go<- DT::renderDataTable({
-        DT::datatable(dt.gtex.rank.go(), rownames = FALSE, filter='top', 
+        DT::datatable(dt.pt.bottom.go(), rownames = FALSE, filter='top', 
                       options = list(searchHighlight = TRUE, search = list(regex = FALSE, caseInsensitive = TRUE, search = 'DNA repair'), pageLength = 15))
     })
-
-    if(FALSE){
-        row.num.not.in.pt<-reactive({
-            ifelse(nrow(dt.gtex.rank())>50,50,nrow(dt.gtex.rank()))
-        })
-
-        mat.gtex.rank<-reactive({
-            dt.gtex.rank<-dcast.data.table(dt.gtex.rank(), hgnc_symbol~Tissue, value.var="meanFpkm")
-            mat.not.in.pt<-as.matrix(dt.gtex.rank[,-c("hgnc_symbol")])[1:row.num.not.in.pt(),]
-            mat.not.in.pt<-log10(mat.not.in.pt+0.001)
-            colnames(mat.not.in.pt)<-gsub("_"," ",colnames(mat.not.in.pt))
-            rownames(mat.not.in.pt)<-dt.gtex.rank[1:row.num()]$hgnc_symbol
-            return(mat.not.in.pt)
-        })
-
-        output$heatmap_not_in_pt <- renderD3heatmap({
-            d3heatmap(
-                mat.gtex.rank(),
-                cellnote=dcast.data.table(dt.gtex.rank(), hgnc_symbol~Tissue, value.var="meanFpkm")[1:row.num.not.in.pt()],
-                dendrogram = "column",
-                xaxis_font_size = "10pt",
-                colors = grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name="RdYlBu")))(100) 
-            )
-        })
-    }
 
 })

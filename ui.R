@@ -309,7 +309,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                             checkboxInput("no_ribosomal", label = "EXCLUDE ribosomal protein?", value = TRUE)),
                         # drop down - min baseMean
                         selectInput("min_gtex_count", 
-                                    label = "Minimum Read Count per tissue:", 
+                                    label = "Minimum read count of non-placental tissue:", 
                                     choices=list(`>10`=10,`>20`=20,`>50`=50, `>100`=100),
                                     selected=10),
                         # drop down - min FPKM of GTEx 
@@ -318,18 +318,20 @@ navbarPage(title="POPS Placenta Transcriptome",
                                     choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
                                     selected=1),
                         # drop down - min FPKM of placenta 
-                        selectInput("gtex_pt_fc", 
-                                    label = "Fold change of a non-placenta tissue compared with the placenta (Minimum FPKM (non-placenta) / FPKM (Placenta)):", 
-                                    choices=list(`>2x`=2,`>5x`=5,`>10x`=10,`>100x`=100),
+                        selectInput("min_gtex_fc", 
+                                    label = "Minimum fold change of a non-placental tissue compared with the placenta (i.e. FPKM (non-placenta) / FPKM (Placenta)):", 
+                                    choices=list(`>2x`=2,`>5x`=5,`>10x`=10,`>50x`=50,`>100x`=100),
                                     selected=5),
                         downloadButton("download_not_in_pt", "Download")
                     ), # end of sidebarPanel
                     # Show a plot of the generated distribution
                     mainPanel(
                         tabsetPanel(
+                            tabPanel("Summary",
+                                        DT::dataTableOutput('not_in_placenta_summary')
+                            ),
                             tabPanel("Rank",
-                                     DT::dataTableOutput('not_in_placenta')
-                                    #d3heatmapOutput("heatmap_not_in_pt", width="95%", height="1200px")
+                                     DT::dataTableOutput('not_in_placenta_rank')
                             ),
                             tabPanel("GO annotation",
                                      DT::dataTableOutput('not_in_placenta_go')

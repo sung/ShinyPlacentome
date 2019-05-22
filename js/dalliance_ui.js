@@ -30,16 +30,16 @@
     },
 
     browserLinks: {
-      Ensembl: 'http://www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
-      UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${chr}:${start}-${end}',
-      Sequence: 'http://www.derkholm.net:8080/das/hg19ToHg38/sequence?segment=${chr}:${start},${end}'
+      Ensembl: 'https://www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+      UCSC: 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${chr}:${start}-${end}',
+      Sequence: 'https://www.derkholm.net:8080/das/hg19ToHg38/sequence?segment=${chr}:${start},${end}'
     },
 
     hubs: ['http://ngs.sanger.ac.uk/production/ensembl/regulation/hub.txt', {url: 'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt', genome: 'hg19', mapping: 'hg19ToHg38'}],
 
 	sources: [
             {name: 'Genome',
-            twoBitURI:            'http://www.biodalliance.org/datasets/hg38.2bit',
+            twoBitURI:            '//www.biodalliance.org/datasets/hg38.2bit',
             tier_type: 'sequence'},
 
             {name: 'Repeats',
@@ -57,7 +57,7 @@
 
             {name: 'Ensembl REST',
             desc: 'Ensembl Transcript Model of GRCh38',
-            uri: 'http://rest.ensembl.org',
+            uri: '//rest.ensembl.org',
             collapseSuperGroups: true,
             tier_type: 'ensembl',
             species: 'human',
@@ -73,7 +73,7 @@
             desc: 'Placenta Transcriptome',
             collapseSuperGroups: true,
             bwgURI: '//nectarmutation.org/main/static/POPS.GRCh38.82.cuffcompare.combined.bb',
-            stylesheet_uri: 'http://www.biodalliance.org/stylesheets/gencode.xml',
+            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode.xml',
             trixURI: '//nectarmutation.org/main/static/POPS.GRCh38.82.cuffcompare.combined.geneName.ix'},
 
             {name: 'POPS30 circRNA',
