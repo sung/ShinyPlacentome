@@ -353,4 +353,25 @@ shinyServer(function(input, output,session) {
                       options = list(searchHighlight = TRUE, search = list(regex = FALSE, caseInsensitive = TRUE, search = 'DNA repair'), pageLength = 15))
     })
 
+    output$download_not_in_pt<- downloadHandler(
+        # This function returns a string which tells the client
+        # browser what name to use when saving the file.
+        filename = function() {
+                paste(input$not.in.pt.tab,"of",input$transcript_not_in_pt,"genes.not.in.placneta.but.in.gtex.at.least",
+                      input$min_gtex_count,"count",input$min_gtex_fpkm,"fpkm",input$min_gtex_fc,"FC.tsv.gz",sep=".")
+        },
+        # This function should write data to a file given to it by
+        # the argument 'file'.
+        content = function(file) {
+            # Write to a file specified by the 'file' argument
+            if(input$not.in.pt.tab=="summary"){
+                write.table(dt.pt.bottom.summary(),gzfile(file), sep="\t",row.names = FALSE, quote=F)
+            }else if(input$not.in.pt.tab=="rank"){
+                write.table(dt.pt.bottom.rank(),gzfile(file), sep="\t",row.names = FALSE, quote=F)
+            }else{
+                write.table(dt.pt.bottom.go(),gzfile(file), sep="\t",row.names = FALSE, quote=F)
+            }
+        }
+    ) # end of downloadData
+
 })

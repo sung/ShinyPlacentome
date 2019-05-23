@@ -277,7 +277,8 @@ navbarPage(title="POPS Placenta Transcriptome",
                         conditionalPanel(
                             condition="input.radio_gtex==2",
                             selectizeInput("gtex_genes","Gene Name(s):", choices=NULL, selected="FSTL3", multiple=TRUE) # server side
-                        )
+                        ),
+                        downloadButton("download_gtex", "Download")
                     ),
                     # Show a plot of the generated distribution
                     mainPanel(
@@ -327,15 +328,16 @@ navbarPage(title="POPS Placenta Transcriptome",
                     # Show a plot of the generated distribution
                     mainPanel(
                         tabsetPanel(
-                            tabPanel("Summary",
+                            tabPanel("Summary",value="summary",
                                         DT::dataTableOutput('not_in_placenta_summary')
                             ),
-                            tabPanel("Rank",
+                            tabPanel("Rank",value="rank",
                                      DT::dataTableOutput('not_in_placenta_rank')
                             ),
-                            tabPanel("GO annotation",
+                            tabPanel("GO annotation",value="go.annotation",
                                      DT::dataTableOutput('not_in_placenta_go')
-                            )
+                            ),
+                            id="not.in.pt.tab"
                         )
                     ) # end of mainPanel
                 ) # end of sidebarLayout
