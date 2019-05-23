@@ -10,19 +10,20 @@ library(d3heatmap)
 library(shiny)
 
 load("RData/DEG.RData") # dt.deseq (isa data.table)
-                        # dt.boot (isa data.table)
-load("RData/dt.gtex.pt.fpkm.tau.RData") # dt.gtex.pt.fpkm.tau (isa data.table)
+                        # dt.boot (isa data.table) 3.1M
+load("RData/dt.gtex.pt.fpkm.tau.RData") # dt.gtex.pt.fpkm.tau (isa data.table) 2.9M
 
 #load("RData/dt.pops.tr.RData") # dt.pops.tr # it takes long
 #library(feather) # devtools::install_github("wesm/feather/R") 
                  # https://blog.rstudio.com/2016/03/29/feather/
 #dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
 load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R
-                                 # dl.abundance
+                                 # 5.2M
 
 
 load("RData/dt.gtex.fpkm.RData") # 19M
 load("RData/dt.ensg.desc.2019-05-20.RData") # 1.3M
+load("RData/dt.ensg.go.2019-05-22.RData") # 5.1M
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
@@ -333,11 +334,15 @@ shinyServer(function(input, output,session) {
     })
 
     dt.pt.bottom.go<-reactive({
-        data.table(biomaRt::getBM(attributes =c("ensembl_gene_id","hgnc_symbol","description","go_id","name_1006"), 
-                                              filters = "ensembl_gene_id", 
-                                              values = dt.pt.bottom.summary()$ensembl_gene_id,
-                                              mart=biomaRt::useMart(biomart = "ensembl", dataset="hsapiens_gene_ensembl")
-                                              ))
+        if(TRUE){
+            dt.ensg.go[ensembl_gene_id %in% dt.pt.bottom.summary()$ensembl_gene_id]
+        }else{
+            data.table(biomaRt::getBM(attributes =c("ensembl_gene_id","hgnc_symbol","description","go_id","name_1006"), 
+                                                filters = "ensembl_gene_id", 
+                                                values = dt.pt.bottom.summary()$ensembl_gene_id,
+                                                mart=biomaRt::useMart(biomart = "ensembl", dataset="hsapiens_gene_ensembl")
+                                                ))
+        }
     })
 
     output$not_in_placenta_summary<- DT::renderDataTable({
