@@ -9,18 +9,13 @@ library(DT)
 library(d3heatmap)
 library(shiny)
 
-load("RData/DEG.RData") # dt.deseq (isa data.table)
-                        # dt.boot (isa data.table) 3.1M
+load("RData/DEG.RData") # dt.deseq (isa data.table) # dt.boot (isa data.table) 3.1M
 load("RData/dt.gtex.pt.fpkm.tau.RData") # dt.gtex.pt.fpkm.tau (isa data.table) 2.9M
-
 #load("RData/dt.pops.tr.RData") # dt.pops.tr # it takes long
 #library(feather) # devtools::install_github("wesm/feather/R") 
                  # https://blog.rstudio.com/2016/03/29/feather/
 #dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
-load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R
-                                 # 5.2M
-
-
+load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R # 5.2M
 load("RData/dt.gtex.fpkm.RData") # 19M
 load("RData/dt.ensg.desc.2019-05-20.RData") # 1.3M
 load("RData/dt.ensg.go.2019-05-22.RData") # 5.1M
@@ -346,14 +341,32 @@ shinyServer(function(input, output,session) {
     })
 
     output$not_in_placenta_summary<- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
+
         DT::datatable(dt.pt.bottom.summary(), rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
     output$not_in_placenta_rank<- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
+
         DT::datatable(dt.pt.bottom.rank()[,-"description"], rownames = FALSE, filter='top', options = list(pageLength = length(gtex_tissues)+1-length(input$no_gtex_tissue)))
     })
 
     output$not_in_placenta_go<- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
+
         DT::datatable(dt.pt.bottom.go(), rownames = FALSE, filter='top', 
                       options = list(searchHighlight = TRUE, search = list(regex = FALSE, caseInsensitive = TRUE, search = 'DNA repair'), pageLength = 15))
     })
