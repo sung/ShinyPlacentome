@@ -36,9 +36,19 @@ shinyServer(function(input, output,session) {
     })
 
     output$deg_pval_PE <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.deseq.pe(), rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
     output$deg_pval_SGA <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.deseq.sga(), rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
     # downloadHandler() takes two arguments, both functions.
@@ -69,17 +79,37 @@ shinyServer(function(input, output,session) {
     })
 
     output$deg_boot_pe_all <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.boot.pe()[analysis.type=="all"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from all the qualified genes", rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
     output$deg_boot_pe_oneThird <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.boot.pe()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
     output$deg_boot_sga_all <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.boot.sga()[analysis.type=="all"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from all the qualified genes", rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
     output$deg_boot_sga_oneThird <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.boot.sga()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
@@ -104,6 +134,12 @@ shinyServer(function(input, output,session) {
     updateSelectizeInput(session, 'deg_genes', choices = deg.gene.names, server = TRUE)
 
     output$deg_gene_pval <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
+
         DT::datatable(
             rbind(
                 dt.deseq[hgnc_symbol %in% input$deg_genes,
@@ -114,6 +150,11 @@ shinyServer(function(input, output,session) {
         )
     })
     output$deg_gene_boot <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(
                 dt.boot[hgnc_symbol %in% input$deg_genes,
                         .(`Analysis type`=analysis.type,`Gene`=hgnc_symbol,`ENSG`=ID,"Log2FC(PE vs Control)"=round(log2FC.Boot.x,2),"Log2FC(SGA vs Control)"=round(log2FC.Boot.y,2))]
@@ -125,6 +166,11 @@ shinyServer(function(input, output,session) {
     updateSelectizeInput(session, 'deg_ensgs', choices = ensg.ids, server = TRUE)
 
     output$deg_ensg_pval <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(
             rbind(
                 dt.deseq[ID %in% input$deg_ensgs,
@@ -135,6 +181,11 @@ shinyServer(function(input, output,session) {
         )
     })
     output$deg_ensg_boot <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(
                 dt.boot[ID %in% input$deg_ensgs,
                         .(`Analysis type`=analysis.type,`Gene`=hgnc_symbol,`ENSG`=ID,"Log2FC(PE vs Control)"=round(log2FC.Boot.x,2),"Log2FC(SGA vs Control)"=round(log2FC.Boot.y,2))]
@@ -163,6 +214,11 @@ shinyServer(function(input, output,session) {
 
     # 2. render data.table
     output$pops_tr <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.abundance(),rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
@@ -214,6 +270,11 @@ shinyServer(function(input, output,session) {
     })
 
     output$tau <- DT::renderDataTable({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.tau()[,-"gene_biotype"], caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
@@ -237,6 +298,11 @@ shinyServer(function(input, output,session) {
     })
 
     output$heatmap <- renderD3heatmap({
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        progress$set(message = "Rendering heatmap", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         d3heatmap(
             mat.tau(),
             cellnote=dt.tau()[,-c("ensembl_gene_id","meanFpkmGTEx","Tau","chromosome_name","hgnc_symbol","gene_biotype")][1:row.num()],
@@ -262,6 +328,10 @@ shinyServer(function(input, output,session) {
     })
 
     output$gtex_fpkm <- DT::renderDataTable({
+        progress <- shiny::Progress$new()
+        progress$set(message = "Loading table", value = 0)
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         DT::datatable(dt.gtex(), caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 21))
     })
 

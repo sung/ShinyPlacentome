@@ -235,7 +235,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                                     selected=1),
                         # a set of radio buttons - transcript type
                         # tau score range 
-                        sliderInput("tau", label = a("Tau score",href="https://academic.oup.com/bib/article/18/2/205/2562739",target="_blank"), min = 0.9, max = 1, value = c(0.99,1)),
+                        sliderInput("tau", label = a("Tau score",href="https://academic.oup.com/bib/article/18/2/205/2562739",target="_blank"), min = 0.5, max = 1, value = c(0.99,1)),
                         # drop down - min FPKM of placenta 
                         selectInput("pt_gtex_fc", 
                                     label = "Fold change of placenta compared with the average of 20 GTEx tissues:", 
@@ -292,7 +292,7 @@ navbarPage(title="POPS Placenta Transcriptome",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
-                        helpText(h3("Browse genes not specifically expressed in the placneta")),
+                        helpText("Browse genes not specifically expressed in the placneta compared other tissues"),
                         # checkbox of tissues to exclude
                         checkboxGroupInput("no_gtex_tissue", 
                                       label = "EXCLUDE following tissues from GTEx", 
