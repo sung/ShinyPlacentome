@@ -252,7 +252,8 @@ shinyServer(function(input, output,session) {
 
     dt.gtex<-reactive({
         if(input$radio_gtex==1){
-            dt.gtex.pt.fpkm.tau[Placenta > as.numeric(input$pt_fpkm2)][order(-Placenta)]
+            dt.gtex.tau<-cbind(dt.gtex.pt.fpkm.tau[,1:4], dt.gtex.pt.fpkm.tau[,.(Tau)],dt.gtex.pt.fpkm.tau[,5:26])
+            dt.gtex.tau[Placenta > as.numeric(input$pt_fpkm2)][order(-Placenta)]
         }else{
             dt.foo<-melt.data.table(dt.gtex.pt.fpkm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanFpkmGTEx","Tau")],
                             id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="FPKM")
@@ -316,11 +317,14 @@ shinyServer(function(input, output,session) {
         dt.pt.bottom<-dt.pt.bottom()
         # get min,max,mean,median of the genes above
         dt.pt.bottom.summary<-merge(
-                    dt.pt.bottom[Tissue!="Placenta",
-                                .(`GTEx_minFPKM`=round(min(meanFpkm),3),`GTEx_maxFPKM`=round(max(meanFpkm),3),`GTEx_medianFPKM`=round(median(meanFpkm),3),`GTEx_meanFPKM`=round(mean(meanFpkm),3)),
-                                .(ensembl_gene_id,hgnc_symbol,description)],
-                    dt.pt.bottom[Tissue=="Placenta",.(ensembl_gene_id,`Placenta_meanFPKM`=round(meanFpkm,3))]
-                    )[order(Placenta_meanFPKM)]
+                                    merge(
+                                        dt.pt.bottom[,.(Tau=sapply(.SD,fTau)),.(ensembl_gene_id,hgnc_symbol,description),.SDcol="meanFpkm"],
+                                        dt.pt.bottom[Tissue!="Placenta",
+                                                    .(`GTEx_minFPKM`=round(min(meanFpkm),3),`GTEx_maxFPKM`=round(max(meanFpkm),3),`GTEx_medianFPKM`=round(median(meanFpkm),3),`GTEx_meanFPKM`=round(mean(meanFpkm),3)),
+                                                    .(ensembl_gene_id)]
+                                    ),
+                                    dt.pt.bottom[Tissue=="Placenta",.(ensembl_gene_id,`Placenta_meanFPKM`=round(meanFpkm,3))]
+                                          )[order(Placenta_meanFPKM)]
         dt.pt.bottom.summary[GTEx_minFPKM>as.numeric(input$min_gtex_fpkm) & GTEx_minFPKM/Placenta_meanFPKM>as.numeric(input$min_gtex_fc)]
     })
 
