@@ -12,4 +12,4 @@
 > NIHR Cambridge Biomedical Research Centre
 
 ![University of Cambridge](www/images/Uni-Camb-Medic-Logo.png)
-![NIHR Cambridge Biomedical Research Centre](www/images/Cambridge_BRC_NIHR_logo_2019_RGB.jpeg)
+<img src="www/images/Cambridge_BRC_NIHR_logo_2019_RGB.jpeg" width=350>
