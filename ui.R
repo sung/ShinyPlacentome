@@ -15,7 +15,7 @@ library(d3heatmap)
 
 navbarPage(title="POPS Placenta Transcriptome",
     theme=shinytheme("sandstone"),
-    # below works
+    # below works for 'dalliance.js'
 #    withTags({
 #        head(
 #                script(
@@ -23,8 +23,7 @@ navbarPage(title="POPS Placenta Transcriptome",
 #                )
 #        )
 #    }),
-
-    #tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")), # does not work
+#    tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")), # does not work
 
     tabPanel("Home",
         includeMarkdown("home.md")
@@ -282,7 +281,11 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ),
                     # Show a plot of the generated distribution
                     mainPanel(
-                        DT::dataTableOutput('gtex_fpkm')
+                        DT::dataTableOutput('gtex_fpkm'),
+                        conditionalPanel(
+                            condition="input.radio_gtex==2",
+                            plotOutput("gtex_fpkm_barchart")
+                        )
                     ) # end of mainPanel
                 )
             )

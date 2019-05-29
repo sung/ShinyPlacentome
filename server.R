@@ -7,6 +7,7 @@
 library(data.table)
 library(DT)
 library(d3heatmap)
+library(ggplot2)
 library(shiny)
 
 load("RData/DEG.RData") # dt.deseq (isa data.table) # dt.boot (isa data.table) 3.1M
@@ -317,10 +318,10 @@ shinyServer(function(input, output,session) {
     updateSelectizeInput(session, 'gtex_genes', choices = gtex.gene.names, server = TRUE)
 
     dt.gtex<-reactive({
-        if(input$radio_gtex==1){
+        if(input$radio_gtex==1){ # all the genes
             dt.gtex.tau<-cbind(dt.gtex.pt.fpkm.tau[,1:4], dt.gtex.pt.fpkm.tau[,.(Tau)],dt.gtex.pt.fpkm.tau[,5:26])
             dt.gtex.tau[Placenta > as.numeric(input$pt_fpkm2)][order(-Placenta)]
-        }else{
+        }else{ # user-provided genes
             dt.foo<-melt.data.table(dt.gtex.pt.fpkm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanFpkmGTEx","Tau")],
                             id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="FPKM")
             dt.foo[,`Source`:=ifelse(Tissue=="Placenta","POPS","GTEx")][order(hgnc_symbol,-Source,-FPKM)]
@@ -333,6 +334,18 @@ shinyServer(function(input, output,session) {
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
         DT::datatable(dt.gtex(), caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 21))
+    })
+
+    output$gtex_fpkm_barchart<-renderPlot({
+        if(length(input$gtex_genes>0)){
+            ggplot(dt.gtex(), aes(Tissue, FPKM, fill=hgnc_symbol)) + 
+                geom_bar(col='gray10',stat="identity",position="dodge") + 
+                scale_x_discrete(limits=dt.gtex()[,.(`meanFPKM`=mean(FPKM)),Tissue][order(-`meanFPKM`)]$Tissue) +
+                ggsci::scale_fill_jco(name="Gene Name(s)",alpha=.75) +
+                ylab("log2(FPKM)") +
+                theme_Publication() + 
+                theme(axis.text.x=element_text(angle=45, hjust=1))
+        }
     })
 
     output$download_gtex<- downloadHandler(
