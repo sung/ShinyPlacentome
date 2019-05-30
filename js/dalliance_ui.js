@@ -30,9 +30,9 @@
     },
 
     browserLinks: {
-      Ensembl: 'https://www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
-      UCSC: 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${chr}:${start}-${end}',
-      Sequence: 'https://www.derkholm.net:8080/das/hg19ToHg38/sequence?segment=${chr}:${start},${end}'
+      Ensembl: '//www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',
+      UCSC: '//genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr${chr}:${start}-${end}',
+      Sequence: '//www.derkholm.net:8080/das/hg19ToHg38/sequence?segment=${chr}:${start},${end}'
     },
 
     hubs: ['http://ngs.sanger.ac.uk/production/ensembl/regulation/hub.txt', {url: 'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt', genome: 'hg19', mapping: 'hg19ToHg38'}],
@@ -72,14 +72,14 @@
             {name: 'POPS Transcriptome v82',
             desc: 'Placenta Transcriptome',
             collapseSuperGroups: true,
-            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/POPS.GRCh38.82.cuffcompare.combined.bb',
+            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/POPS.GRCh38.82.cuffcompare.combined.geneName.bb',
             stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode.xml',
             trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/POPS.GRCh38.82.cuffcompare.combined.geneName.ix'},
 
             {name: 'POPS30 circRNA',
             desc: 'circular RNAs present in 30% of POPS cohort',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/circRNA.POPS30.CIRI2.GRCh38.bb',
-            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'darkgreen', BGCOLOR: 'rgb(117,214,146)', LABEL:'yes'}}]},
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'darkgreen', BGCOLOR: 'rgb(117,214,146)', LABEL:'yes',HEIGHT:7}}]},
 
             {name: 'POPS total-RNA Coverage',
             desc: 'Total RNA-Seq Coverage of POPS Cohort',
@@ -91,22 +91,24 @@
             {name: 'miRBase v21',
             desc: 'microRNA sequences and annotations from miRBase v21',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/miRbase.v21.GRCh38.bb',
-            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'rgb(196,86,39)', BGCOLOR: 'rgb(255,214,104)', LABEL:'yes'}}]},
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'rgb(196,86,39)', BGCOLOR: 'rgb(255,214,104)', LABEL:'yes',HEIGHT:8}}],
+            trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/miRbase.v21.GRCh38.ix'},
 
-            {name: 'piRBase v1',
+            {name: 'piRBase v1.0',
             desc: 'piwi-interacting RNA sequences and annotations from piRBase v1',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/piRNA.v1-miR.overlap30.GRCh38.bb',
-            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'navy', BGCOLOR: 'rgb(13, 187, 221)', LABEL:'yes'}}]},
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'navy', BGCOLOR: 'rgb(13, 187, 221)', LABEL:'yes',HEIGHT:8}}],
+            trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/piRNA.v1-miR.overlap30.GRCh38.ID.ix'},
         
             {name: 'POPS novel miRNA',
             desc: 'novel miRNAs present in at least one sample of POPS cohort',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/novel.miRNA.GRCh38.merged.bb',
-            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'orange', BGCOLOR: 'yellow', LABEL:'yes'}}]},
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'orange', BGCOLOR: 'yellow', LABEL:'yes',HEIGHT:8}}]},
 
             {name: 'POPS novel small-RNA',
             desc: 'novel small-RNA present in at least one sample of POPS cohort',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/novel.smallRNA.GRCh38.merged.bb',
-            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'navy', BGCOLOR: 'blue', LABEL:'yes'}}]},
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'navy', BGCOLOR: 'blue', LABEL:'yes',HEIGHT:8}}]},
 
             {name: 'POPS small-RNA Coverage',
             desc: 'small RNA-Seq Coverage of POPS Cohort',
