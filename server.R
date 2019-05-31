@@ -8,6 +8,7 @@ library(data.table)
 library(DT)
 library(d3heatmap)
 library(ggplot2)
+library(ggsci)
 library(shiny)
 
 load("RData/DEG.RData") # dt.deseq (isa data.table) # dt.boot (isa data.table) 3.1M
