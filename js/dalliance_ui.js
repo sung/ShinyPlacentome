@@ -49,6 +49,7 @@
             stylesheet_uri: '//www.biodalliance.org/stylesheets/bb-repeats2.xml'},
 
             {name: 'GENCODEv21',
+            disabled: true,
             desc: 'Gene structures from GENCODE 21',
             bwgURI: '//www.biodalliance.org/datasets/GRCh38/gencode.v21.annotation.bb',
             stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml',
@@ -56,12 +57,20 @@
             trixURI: '//www.biodalliance.org/datasets/GRCh38/gencode.v21.annotation.ix'},
 
             {name: 'Ensembl REST',
+            disabled: true,
             desc: 'Ensembl Transcript Model of GRCh38',
             uri: '//rest.ensembl.org',
             collapseSuperGroups: true,
             tier_type: 'ensembl',
             species: 'human',
             type: ['gene','transcript','exon','cds']},
+        
+            {name: 'Ensembl v94',
+            desc: 'Ensembl Transcript Model v94',
+            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/Homo_sapiens.GRCh38.94.bb',
+            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml',
+            collapseSuperGroups: true,
+            trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/Homo_sapiens.GRCh38.94.geneName.ix'},
 
             {name: 'CHESS v2.1',
             desc: 'CHESS v2.1',
