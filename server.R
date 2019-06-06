@@ -24,6 +24,14 @@ load("RData/dt.ensg.go.2019-05-22.RData") # 5.1M
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output,session) {
+    # Get the bookmakr IDs
+    bk_names<-isolate(names(input)[grepl("bk_",names(input))])
+    setBookmarkExclude(bk_names)
+    # Need to exclude the buttons from themselves being bookmarked
+    #setBookmarkExclude(c("pops_tr_rows_all","pops_tr_rows_current","pops_tr_search_columns"))
+    # Trigger bookmarkings 
+    lapply(bk_names, function(i){observeEvent(input[[i]], {session$doBookmark()})})
+
     ##############
     # Browse DEG #
     ##############
