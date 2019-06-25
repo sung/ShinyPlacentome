@@ -14,17 +14,15 @@ library(d3heatmap)
 #gene.names<-dt.deseq[!is.na(hgnc_symbol),.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol # client side list of genes
 
 function(request) {
-    navbarPage(title="POPS Placenta Transcriptome",id="placentome",
+    navbarPage(title="POPS Placenta Transcriptome",
+        id="placentome",
+        selected="Home",
+        position="fixed-top",
         theme=shinytheme("sandstone"),
-        # below works for 'dalliance.js'
-    #    withTags({
-    #        head(
-    #                script(
-    #                    src="http://www.biodalliance.org/release-0.13/dalliance-compiled.js"
-    #                )
-    #        )
-    #    }),
-    #    tag$head(tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js")), # does not work
+
+        header=tags$head(tags$style(type="text/css", "body{padding-top: 70px;padding-bottom:70px};#footer{height:10px;padding:1px};")),
+
+        #footer= tags$div(id="footer",class="navbar navbar-default",span(id="footer",class="footer nav navbar-nav navbar-brand","Developed by ",a(href="https://github.com/sung/","Sung Gong"),",",a(href="https://www.obgyn.cam.ac.uk"," Dept of Obs&Gynae"),",",a(href="https://www.cam.ac.uk","Univ of Cambridge"))),
 
         tabPanel("Home",
             includeMarkdown("home.md")

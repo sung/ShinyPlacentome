@@ -1,7 +1,9 @@
+.gitignore
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 rsconnect/*
+shiny_bookmarks/*
 RData/dt.pops.*
 *.swp
