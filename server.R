@@ -208,9 +208,17 @@ shinyServer(function(input, output,session) {
             }
         }else if(input$ab_transcript=="novel_isoform"){
             num_exon<-ifelse(input$no_single_exon,1,0)
-            dl.abundance[[input$ab_transcript]][exon.cnt>num_exon & FPKM>as.numeric(input$fpkm) & `sample freq`>=input$evi.ratio[1] & `sample freq`<=input$evi.ratio[2],-"class_code"]
+            if(as.numeric(input$fpkm)==0){
+                dl.abundance[[input$ab_transcript]][exon.cnt>num_exon & `sample freq`>=input$evi.ratio[1] & `sample freq`<=input$evi.ratio[2],-"class_code"]
+            }else{
+                dl.abundance[[input$ab_transcript]][exon.cnt>num_exon & FPKM>as.numeric(input$fpkm) & `sample freq`>=input$evi.ratio[1] & `sample freq`<=input$evi.ratio[2],-"class_code"]
+            }
         }else{
-            dl.abundance[[input$ab_transcript]][FPKM>as.numeric(input$fpkm)]
+            if(as.numeric(input$fpkm)==0){
+                dl.abundance[[input$ab_transcript]]
+            }else{
+                dl.abundance[[input$ab_transcript]][FPKM>as.numeric(input$fpkm)]
+            }
         }
     })
 

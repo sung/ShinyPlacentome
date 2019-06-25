@@ -189,7 +189,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         condition="input.ab_transcript != 'circRNA'",
                         selectInput("fpkm", 
                                     label = "Minimum FPKM:", 
-                                    choices=list(`>0.01`=0.01,`>0.1`=0.1,`>1`=1,`>5`=5,`>10`=10),
+                                    choices=list(`>=0`=0,`>0.01`=0.01,`>0.1`=0.1,`>1`=1,`>5`=5,`>10`=10),
                                     selected=1)),
                     # conditional select button - polyA+ or not (circRNA only)
                     conditionalPanel(
