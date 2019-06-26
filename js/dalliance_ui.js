@@ -39,7 +39,7 @@
 
 	sources: [
             {name: 'Genome',
-            twoBitURI:            '//www.biodalliance.org/datasets/hg38.2bit',
+            twoBitURI: '//www.obgyn.cam.ac.uk/Biodalliance/GRCh38.2bit',
             tier_type: 'sequence'},
 
             {name: 'Repeats',
