@@ -18,7 +18,7 @@ load("RData/dt.gtex.pt.fpkm.tau.RData") # dt.gtex.pt.fpkm.tau (isa data.table) 2
                  # https://blog.rstudio.com/2016/03/29/feather/
 #dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
 load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R # 5.2M
-load("RData/dt.gtex.fpkm.RData") # 19M
+load("RData/dt.gtex.fpkm.RData") # 20M
 load("RData/dt.ensg.desc.2019-05-20.RData") # 1.3M
 load("RData/dt.ensg.go.2019-05-22.RData") # 5.1M
 
@@ -327,13 +327,33 @@ shinyServer(function(input, output,session) {
     updateSelectizeInput(session, 'gtex_genes', choices = gtex.gene.names, server = TRUE)
 
     dt.gtex<-reactive({
-        if(input$radio_gtex==1){ # all the genes
-            dt.gtex.tau<-cbind(dt.gtex.pt.fpkm.tau[,1:4], dt.gtex.pt.fpkm.tau[,.(Tau)],dt.gtex.pt.fpkm.tau[,5:26])
-            dt.gtex.tau[Placenta > as.numeric(input$pt_fpkm2)][order(-Placenta)]
-        }else{ # user-provided genes
-            dt.foo<-melt.data.table(dt.gtex.pt.fpkm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanFpkmGTEx","Tau")],
-                            id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="FPKM")
-            dt.foo[,`Source`:=ifelse(Tissue=="Placenta","POPS","GTEx")][order(hgnc_symbol,-Source,-FPKM)]
+        # using dt.gtex.fpkm & tau on-the-fly
+        if(TRUE){
+            if(input$radio_gtex==1){ # all the genes
+                my.ensg<-dt.gtex.fpkm[,.N,ensembl_gene_id][N==23,ensembl_gene_id]
+                dt.tau<-dt.gtex.fpkm[ensembl_gene_id%in%my.ensg,.(Tau=sapply(.SD,fTau)),.(ensembl_gene_id),.SDcol="meanFpkm"]
+                dt.meanGTEx<-dt.gtex.fpkm[ensembl_gene_id%in%my.ensg,.(meanFpkmGTEx=round(mean(meanFpkm),3)),ensembl_gene_id]
+                dt.fpkm<-dcast.data.table(dt.gtex.fpkm[ensembl_gene_id%in%my.ensg,.(ensembl_gene_id,`meanFpkm`=round(meanFpkm,3),Tissue)], ensembl_gene_id~Tissue, value.var="meanFpkm")
+
+                dt.gtex.tau<-merge(merge(merge(dt.ensg.desc[,-"description"], dt.tau), dt.fpkm), dt.meanGTEx)
+                dt.gtex.tau[`Placenta (term)` > as.numeric(input$pt_fpkm2)][order(-`Placenta (term)`)]
+            }else{ # user-provided genes
+                dt.foo<-merge(
+                        dt.ensg.desc[hgnc_symbol %in% input$gtex_genes,-"description"],
+                        dt.gtex.fpkm[ensembl_gene_id %in% dt.ensg.desc[hgnc_symbol %in% input$gtex_genes,ensembl_gene_id],.(ensembl_gene_id,Tissue,"FPKM"=round(meanFpkm,4))]
+                        )
+                dt.foo[,`Source`:=ifelse(grepl("Placenta",Tissue),"POPS","GTEx")][order(hgnc_symbol,-Source,-FPKM)]
+            }
+        # using dt.gtex.pt.fpkm.tau (does not include placenta T1)
+        }else{
+            if(input$radio_gtex==1){ # all the genes
+                dt.gtex.tau<-cbind(dt.gtex.pt.fpkm.tau[,1:4], dt.gtex.pt.fpkm.tau[,.(Tau)],dt.gtex.pt.fpkm.tau[,5:26])
+                dt.gtex.tau[Placenta > as.numeric(input$pt_fpkm2)][order(-Placenta)]
+            }else{ # user-provided genes
+                dt.foo<-melt.data.table(dt.gtex.pt.fpkm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanFpkmGTEx","Tau")],
+                                id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="FPKM")
+                dt.foo[,`Source`:=ifelse(Tissue=="Placenta","POPS","GTEx")][order(hgnc_symbol,-Source,-FPKM)]
+            }
         }
     })
 
@@ -342,16 +362,16 @@ shinyServer(function(input, output,session) {
         progress$set(message = "Loading table", value = 0)
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
-        DT::datatable(dt.gtex(), caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 21))
+        DT::datatable(dt.gtex(), caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 23))
     })
 
     output$gtex_fpkm_barchart<-renderPlot({
-        if(length(input$gtex_genes>0)){
+        if(input$radio_gtex==2 & length(input$gtex_genes>0)){
             ggplot(dt.gtex(), aes(Tissue, FPKM, fill=hgnc_symbol)) + 
                 geom_bar(col='gray10',stat="identity",position="dodge") + 
                 scale_x_discrete(limits=dt.gtex()[,.(`meanFPKM`=mean(FPKM)),Tissue][order(-`meanFPKM`)]$Tissue) +
                 ggsci::scale_fill_jco(name="Gene Name(s)",alpha=.75) +
-                ylab("log2(FPKM)") +
+                ylab("FPKM") +
                 theme_Publication() + 
                 theme(axis.text.x=element_text(angle=45, hjust=1))
         }
@@ -382,23 +402,23 @@ shinyServer(function(input, output,session) {
     #####################
     ## Not in Placenta ##
     #####################
-    # 20 GTEx tissue + 'Placenta'
-    # By deault, n=2('Breast' AND 'Blood') omiited from 20 GTEx
+    # 20 GTEx tissue + 'Placenta (term)' + 'Placenta (7-8wk)' + 'Placenta (13-14wk)'
+    # By deault, n=2('Breast' AND 'Blood') omiited from 20 GTEx AND n=2 Placenta (7-8wk) Placenta (13-14wk)
     dt.pt.bottom<-reactive({
         dt.gtex.desc<-merge(dt.gtex.fpkm,dt.ensg.desc)
-        my.ensg<-dt.gtex.desc[!Tissue %in% c("Placenta",input$no_gtex_tissue)
+        my.ensg<-dt.gtex.desc[!Tissue %in% c("Placenta (term)",input$no_gtex_tissue)
                               & baseMean > as.numeric(input$min_gtex_count)
                               & !chromosome_name %in% c("Y","MT")
                               & gene_biotype==input$transcript_not_in_pt
-                              ,.N,ensembl_gene_id][N==length(gtex_tissues)-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
+                              ,.N,ensembl_gene_id][N==length(gtex_tissues)+length(placenta_t1_tissues)-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
         dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue 
                                    & ensembl_gene_id %in% my.ensg
-                                   ,.(Tissue,meanFpkm,rank=length(gtex_tissues)+1-length(input$no_gtex_tissue)+1 -rank(meanFpkm))
+                                   ,.(Tissue,meanFpkm,rank=length(gtex_tissues)+length(placenta_t1_tissues)+1-length(input$no_gtex_tissue)+1 -rank(meanFpkm))
                                    ,.(ensembl_gene_id,hgnc_symbol,description)][order(ensembl_gene_id,rank)] 
         if(input$no_ribosomal){
-            dt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+            dt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+length(placenta_t1_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta (term)"][order(-meanFpkm)] #
         }else{
-            dt.bottom<-dt.gtex.rank[rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+            dt.bottom<-dt.gtex.rank[rank==length(gtex_tissues)+length(placenta_t1_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta (term)"][order(-meanFpkm)] #
         }
         # genes where the placenta ranked at the bottom
         dt.gtex.rank[ensembl_gene_id %in% dt.bottom$ensembl_gene_id][order(ensembl_gene_id,rank)]
@@ -407,17 +427,23 @@ shinyServer(function(input, output,session) {
     # apply min FPKM of GTEx  & min FC
     dt.pt.bottom.summary<-reactive({
         dt.pt.bottom<-dt.pt.bottom()
-        # get min,max,mean,median of the genes above
+        # get min,max,mean,median of GTEx tissues
+        dt.gtex.summary<-merge(
+                dt.pt.bottom[,.(Tau=sapply(.SD,fTau)),.(ensembl_gene_id,hgnc_symbol,description),.SDcol="meanFpkm"],
+                dt.pt.bottom[!grepl("Placenta",Tissue),
+                            .(`GTEx_minFPKM`=round(min(meanFpkm),3),`GTEx_maxFPKM`=round(max(meanFpkm),3),`GTEx_medianFPKM`=round(median(meanFpkm),3),`GTEx_meanFPKM`=round(mean(meanFpkm),3)),
+                            .(ensembl_gene_id)]
+            )
+
         dt.pt.bottom.summary<-merge(
+                                    dt.gtex.summary,
+                                    # T1 Placenta + Term Placenta
                                     merge(
-                                        dt.pt.bottom[,.(Tau=sapply(.SD,fTau)),.(ensembl_gene_id,hgnc_symbol,description),.SDcol="meanFpkm"],
-                                        dt.pt.bottom[Tissue!="Placenta",
-                                                    .(`GTEx_minFPKM`=round(min(meanFpkm),3),`GTEx_maxFPKM`=round(max(meanFpkm),3),`GTEx_medianFPKM`=round(median(meanFpkm),3),`GTEx_meanFPKM`=round(mean(meanFpkm),3)),
-                                                    .(ensembl_gene_id)]
-                                    ),
-                                    dt.pt.bottom[Tissue=="Placenta",.(ensembl_gene_id,`Placenta_meanFPKM`=round(meanFpkm,3))]
-                                          )[order(Placenta_meanFPKM)]
-        dt.pt.bottom.summary[GTEx_minFPKM>as.numeric(input$min_gtex_fpkm) & GTEx_minFPKM/Placenta_meanFPKM>as.numeric(input$min_gtex_fc)]
+                                        dt.pt.bottom[Tissue %in% placenta_t1_tissues,.(`T1_Placenta_FPKM`=round(mean(meanFpkm),3)),.(ensembl_gene_id)],
+                                        dt.pt.bottom[Tissue=="Placenta (term)",.(ensembl_gene_id,`Term_Placenta_FPKM`=round(meanFpkm,3))], all.y=T
+                                    )
+                                    )[order(Term_Placenta_FPKM)]
+        dt.pt.bottom.summary[GTEx_minFPKM>as.numeric(input$min_gtex_fpkm) & GTEx_minFPKM/Term_Placenta_FPKM>as.numeric(input$min_gtex_fc)]
     })
 
     dt.pt.bottom.rank<-reactive({
@@ -453,7 +479,7 @@ shinyServer(function(input, output,session) {
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
 
-        DT::datatable(dt.pt.bottom.rank()[,-"description"], rownames = FALSE, filter='top', options = list(pageLength = length(gtex_tissues)+1-length(input$no_gtex_tissue)))
+        DT::datatable(dt.pt.bottom.rank()[,-"description"], rownames = FALSE, filter='top', options = list(pageLength = length(gtex_tissues)+length(placenta_t1_tissues)+1-length(input$no_gtex_tissue)))
     })
 
     output$not_in_placenta_go<- DT::renderDataTable({

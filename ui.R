@@ -269,7 +269,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         conditionalPanel(
                             condition="input.radio_gtex==1",
                             selectInput("pt_fpkm2", 
-                                        label = "Minimum FPKM of Placenta:", 
+                                        label = "Minimum FPKM of term placenta:", 
                                         choices=list(`>0`=0,`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
                                         selected=1)
                         ),
@@ -298,9 +298,9 @@ navbarPage(title="POPS Placenta Transcriptome",
                         helpText("Browse genes not specifically expressed in the placneta compared other tissues"),
                         # checkbox of tissues to exclude
                         checkboxGroupInput("no_gtex_tissue", 
-                                      label = "EXCLUDE following tissues from GTEx", 
-                                      choices=gtex_tissues,
-                                      selected=c("Blood","Breast")
+                                      label = "EXCLUDE following tissues from GTEx or 1st trimester placenta", 
+                                      choices=c(gtex_tissues, placenta_t1_tissues),
+                                      selected=c("Blood","Breast","Placenta (7-8wk)","Placenta (13-14wk)")
                                       ),
                         # drop down 
                         selectInput("transcript_not_in_pt", 
@@ -323,7 +323,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                                     selected=1),
                         # drop down - min FPKM of placenta 
                         selectInput("min_gtex_fc", 
-                                    label = "Minimum fold change of a non-placental tissue compared with the placenta (i.e. FPKM (non-placenta) / FPKM (Placenta)):", 
+                                    label = "Minimum fold change of a non-placental tissue compared with the term placenta (i.e. FPKM (non-placenta) / FPKM (term-placenta)):", 
                                     choices=list(`>2x`=2,`>5x`=5,`>10x`=10,`>50x`=50,`>100x`=100),
                                     selected=5),
                         downloadButton("download_not_in_pt", "Download")

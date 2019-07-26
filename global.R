@@ -20,6 +20,10 @@ gtex_tissues<-list(
 `Spleen`="Spleen",
 `Thyroid`="Thyroid")
 
+placenta_t1_tissues<-list(
+`Placenta (7-8wk)`="Placenta (7-8wk)",
+`Placenta (13-14wk)`="Placenta (13-14wk)")
+
 # Suppl information from: https://academic.oup.com/bib/article/18/2/205/2562739
 # Function require a vector with expression of one gene in different tissues.
 # If expression for one tissue is not known, gene specificity for this gene is NA
