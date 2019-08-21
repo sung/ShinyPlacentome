@@ -351,7 +351,7 @@ shinyServer(function(input, output,session) {
                 geom_bar(col='gray10',stat="identity",position="dodge") + 
                 scale_x_discrete(limits=dt.gtex()[,.(`meanFPKM`=mean(FPKM)),Tissue][order(-`meanFPKM`)]$Tissue) +
                 ggsci::scale_fill_jco(name="Gene Name(s)",alpha=.75) +
-                ylab("log2(FPKM)") +
+                ylab("FPKM") +
                 theme_Publication() + 
                 theme(axis.text.x=element_text(angle=45, hjust=1))
         }

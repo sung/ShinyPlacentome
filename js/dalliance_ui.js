@@ -76,7 +76,8 @@
             desc: 'CHESS v2.1',
             collapseSuperGroups: true,
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/chess2.1_assembly.ens.sorted.bb',
-            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml'},
+            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml',
+            trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/chess2.1_assembly.ens.sorted.geneName.ix'},
 
             {name: 'POPS Transcriptome v82',
             desc: 'Placenta Transcriptome',
@@ -102,6 +103,11 @@
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/miRbase.v21.GRCh38.bb',
             style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'rgb(196,86,39)', BGCOLOR: 'rgb(255,214,104)', LABEL:'yes',HEIGHT:8}}],
             trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/miRbase.v21.GRCh38.ix'},
+
+            {name: 'miRBase v22',
+            desc: 'microRNA sequences and annotations from miRBase v22',
+            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/miRbase.22.GRCh38.bb',
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'rgb(204,98,53)', BGCOLOR: 'rgb(255,214,104)', LABEL:'yes',HEIGHT:8}}]},
 
             {name: 'piRBase v1.0',
             desc: 'piwi-interacting RNA sequences and annotations from piRBase v1',
