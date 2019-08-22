@@ -5,7 +5,6 @@
     viewEnd:             693399,
     cookieKey:           'human-grc_h38',
 
-
     coordSystem: {
       speciesName: 'Human',
       taxon: 9606,
@@ -19,14 +18,18 @@
     reverseScrolling: true,
 
     chains: {
-      hg19ToHg38: new Chainset('http://www.derkholm.net:8080/das/hg19ToHg38/', 'GRCh37', 'GRCh38',
-                    {
-                        speciesName: 'Human',
-                        taxon: 9606,
-                        auth: 'GRCh',
-                        version: 37,
-                        ucscName: 'hg19'
-                    })
+        hg19ToHg38: {
+            // uri: '//www.biodalliance.org/datasets/hg19ToHg38.bb',
+            uri: '//www.obgyn.cam.ac.uk/Biodalliance/hg19ToHg38.bb',
+            type: 'bigbed',
+            coords: {
+                speciesName: 'Human',
+                taxon: 9606,
+                auth: 'GRCh',
+                version: 37,
+                ucscName: 'hg19'
+            }
+        }
     },
 
     browserLinks: {
@@ -35,7 +38,15 @@
       Sequence: '//www.derkholm.net:8080/das/hg19ToHg38/sequence?segment=${chr}:${start},${end}'
     },
 
-    hubs: ['http://ngs.sanger.ac.uk/production/ensembl/regulation/hub.txt', {url: 'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt', genome: 'hg19', mapping: 'hg19ToHg38'}],
+    hubs: [
+            {url: 'http://ftp.ensembl.org/pub/papers/regulation/hub.txt', 
+            genome: 'hg19', 
+            mapping: 'hg19ToHg38'},
+
+            {url: 'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt', 
+            genome: 'hg19', 
+            mapping: 'hg19ToHg38'} 
+    ],
 
 	sources: [
             {name: 'Genome',
@@ -129,10 +140,7 @@
             desc: 'small RNA-Seq Coverage of POPS Cohort',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/POPS.small-RNA.GRCh38.depth.more.than.0.bw',
             style: [{type: 'default', style: {glyph: 'HISTOGRAM', BGCOLOR: 'rgb(75,71,166)', HEIGHT: 60, id: 'style1'}}],
-            noDownsample: true,
-            },
-
-
+            noDownsample: true}
 	],
   });
 
