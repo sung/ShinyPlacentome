@@ -361,7 +361,8 @@ navbarPage(title="POPS Placenta Transcriptome",
             #    )
             #}), # it works!
             #tags$script(src = "http://www.biodalliance.org/release-0.13/dalliance-compiled.js"), # it works locally, but not shinyapps.io
-            tags$script(src = "dalliance-compiled.js"), # (www/dalliance-compiled.js) it works both locally and shinyapps.io
+            #tags$script(src = "dalliance-compiled.js"), # (www/dalliance-compiled.js) it works both locally and shinyapps.io
+            tags$script(src = "dalliance-all.js"), # github version (0.13.7-dev)
 
             includeScript(path = "js/dalliance_ui.js"),
 
