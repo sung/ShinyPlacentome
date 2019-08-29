@@ -41,8 +41,9 @@
     hubs: [
             {url: '//ftp.ensembl.org/pub/papers/regulation/hub.txt', 
             forceProtocol: 'https',
-            genome: 'hg19', 
-            mapping: 'hg19ToHg38'},
+            genome: 'hg38'
+            //mapping: 'hg19ToHg38'
+            },
 
             {url: 'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt',
             forceProtocol: 'http',
