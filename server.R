@@ -12,13 +12,13 @@ library(ggsci)
 library(shiny)
 
 load("RData/DEG.RData") # dt.deseq (isa data.table) # dt.boot (isa data.table) 3.1M
-load("RData/dt.gtex.pt.fpkm.tau.RData") # dt.gtex.pt.fpkm.tau (isa data.table) 2.9M
+load("RData/dt.gtex.pt.tpm.tau.RData") # dt.gtex.pt.tpm.tau (isa data.table) 3.2M
 #load("RData/dt.pops.tr.RData") # dt.pops.tr # it takes long
 #library(feather) # devtools::install_github("wesm/feather/R") 
                  # https://blog.rstudio.com/2016/03/29/feather/
 #dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
 load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R # 5.2M
-load("RData/dt.gtex.fpkm.RData") # 19M
+load("RData/dt.gtex.fpkm.RData") # 19M -> 12M
 load("RData/dt.ensg.desc.2019-05-20.RData") # 1.3M
 load("RData/dt.ensg.go.2019-05-22.RData") # 5.1M
 
@@ -95,7 +95,7 @@ shinyServer(function(input, output,session) {
         progress$set(message = "Loading table", value = 0)
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
-        DT::datatable(dt.boot.pe()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.boot.pe()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
     output$deg_boot_sga_all <- DT::renderDataTable({
@@ -112,7 +112,7 @@ shinyServer(function(input, output,session) {
         progress$set(message = "Loading table", value = 0)
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
-        DT::datatable(dt.boot.sga()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 2. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.boot.sga()[analysis.type=="oneThird"][,-"analysis.type"], caption="Table 1. Top 5% (fold-chage) selected from one third of highly abudant genes",rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
     output$download_boot<- downloadHandler(
@@ -258,12 +258,12 @@ shinyServer(function(input, output,session) {
     #######################
     ## Placenta-specific ##
     #######################
-    #output$options<- renderPrint({ paste(input$transcript_tau, input$pt_fpkm1, input$tau[1], input$tau[2], input$pt_gtex_fc)})
+    #output$options<- renderPrint({ paste(input$transcript_tau, input$pt_tpm1, input$tau[1], input$tau[2], input$pt_gtex_fc)})
     #output$test4<- renderPrint({ lapply(input, class)})
     # 1. tau-based
     dt.tau<-reactive({
-        dt.gtex.pt.fpkm.tau[!grepl("^HIST",hgnc_symbol) & hgnc_symbol!="RMRP" &
-                            gene_biotype==input$transcript_tau &  Placenta>as.numeric(input$pt_fpkm1) & Tau>input$tau[1] & Tau<=input$tau[2] & Placenta/meanFpkmGTEx > as.numeric(input$pt_gtex_fc)]
+        dt.gtex.pt.tpm.tau[!grepl("^HIST",hgnc_symbol) & !hgnc_symbol%in%c("RMRP","AL356488.2") &
+                            gene_biotype==input$transcript_tau &  Placenta>as.numeric(input$pt_tpm1) & Tau>input$tau[1] & Tau<=input$tau[2] & Placenta/meanTPMGTEx > as.numeric(input$pt_gtex_fc),-"meanTPMGTEx"]
     })
 
     row.num<-reactive({
@@ -272,7 +272,7 @@ shinyServer(function(input, output,session) {
 
     mat.tau<-reactive({
         dt.tau<-dt.tau()
-        mat.tau<-as.matrix(dt.tau[,-c("ensembl_gene_id","meanFpkmGTEx","Tau","chromosome_name","hgnc_symbol","gene_biotype")])[1:row.num(),]
+        mat.tau<-as.matrix(dt.tau[,-c("ensembl_gene_id","Tau","chromosome_name","hgnc_symbol","gene_biotype")])[1:row.num(),]
         mat.tau<-log10(mat.tau+0.001)
         colnames(mat.tau)<-gsub("_"," ",colnames(mat.tau))
         rownames(mat.tau)<-dt.tau[1:row.num()]$hgnc_symbol
@@ -285,7 +285,7 @@ shinyServer(function(input, output,session) {
         progress$set(message = "Loading table", value = 0)
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
-        DT::datatable(dt.tau()[,-"gene_biotype"], caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.tau()[,-"gene_biotype"], caption="Table 1. Expression level (TPM) of 20 somatic tissues (from GTEx) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 15))
     })
 
     output$download_tau<- downloadHandler(
@@ -304,7 +304,7 @@ shinyServer(function(input, output,session) {
     ) # end of downloadData
 
     output$heatmap_title <- renderText({
-        paste("Clustering of top ", row.num(), input$transcript_tau, "genes specifically expressed in the placneta (color-scale:log10(FPKM))")
+        paste("Clustering of top ", row.num(), input$transcript_tau, "genes specifically expressed in the placneta (color-scale:log10(TPM))")
     })
 
     output$heatmap <- renderD3heatmap({
@@ -315,7 +315,7 @@ shinyServer(function(input, output,session) {
         on.exit(progress$close())
         d3heatmap(
             mat.tau(),
-            cellnote=dt.tau()[,-c("ensembl_gene_id","meanFpkmGTEx","Tau","chromosome_name","hgnc_symbol","gene_biotype")][1:row.num()],
+            cellnote=dt.tau()[,-c("ensembl_gene_id","Tau","chromosome_name","hgnc_symbol","gene_biotype")][1:row.num()],
             dendrogram = "column",
             xaxis_font_size = "10pt",
             colors = grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name="RdYlBu")))(100) 
@@ -323,35 +323,35 @@ shinyServer(function(input, output,session) {
     })
 
     # 2. ALL or by Gene Name(s) 
-    gtex.gene.names<-dt.gtex.pt.fpkm.tau[,.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol
+    gtex.gene.names<-dt.gtex.pt.tpm.tau[,.N,hgnc_symbol][order(hgnc_symbol)]$hgnc_symbol
     updateSelectizeInput(session, 'gtex_genes', choices = gtex.gene.names, server = TRUE)
 
     dt.gtex<-reactive({
         if(input$radio_gtex==1){ # all the genes
-            dt.gtex.tau<-cbind(dt.gtex.pt.fpkm.tau[,1:4], dt.gtex.pt.fpkm.tau[,.(Tau)],dt.gtex.pt.fpkm.tau[,5:26])
-            dt.gtex.tau[Placenta > as.numeric(input$pt_fpkm2)][order(-Placenta)]
+            dt.gtex.tau<-cbind(dt.gtex.pt.tpm.tau[,1:4], dt.gtex.pt.tpm.tau[,.(Tau)],dt.gtex.pt.tpm.tau[,5:25])
+            dt.gtex.tau[Placenta > as.numeric(input$pt_tpm2)][order(-Placenta)]
         }else{ # user-provided genes
-            dt.foo<-melt.data.table(dt.gtex.pt.fpkm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanFpkmGTEx","Tau")],
-                            id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="FPKM")
-            dt.foo[,`Source`:=ifelse(Tissue=="Placenta","POPS","GTEx")][order(hgnc_symbol,-Source,-FPKM)]
+            dt.foo<-melt.data.table(dt.gtex.pt.tpm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanTPMGTEx","Tau")],
+                            id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="TPM")
+            dt.foo[,`Source`:=ifelse(Tissue=="Placenta","POPS","GTEx")][order(hgnc_symbol,-Source,-TPM)]
         }
     })
 
-    output$gtex_fpkm <- DT::renderDataTable({
+    output$gtex_tpm<- DT::renderDataTable({
         progress <- shiny::Progress$new()
         progress$set(message = "Loading table", value = 0)
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
-        DT::datatable(dt.gtex(), caption="Table 1. Expression level (FPKM) of 20 somatic tissues (from GTEX) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 21))
+        DT::datatable(dt.gtex(), caption="Table 1. Expression level (TPM) of 20 somatic tissues (from GTEx) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 21))
     })
 
-    output$gtex_fpkm_barchart<-renderPlot({
+    output$gtex_tpm_barchart<-renderPlot({
         if(length(input$gtex_genes>0)){
-            ggplot(dt.gtex(), aes(Tissue, FPKM, fill=hgnc_symbol)) + 
+            ggplot(dt.gtex(), aes(Tissue, log10(TPM+1), fill=hgnc_symbol)) + 
                 geom_bar(col='gray10',stat="identity",position="dodge") + 
-                scale_x_discrete(limits=dt.gtex()[,.(`meanFPKM`=mean(FPKM)),Tissue][order(-`meanFPKM`)]$Tissue) +
+                scale_x_discrete(limits=dt.gtex()[,.(`meanTPM`=mean(TPM)),Tissue][order(-`meanTPM`)]$Tissue) +
                 ggsci::scale_fill_jco(name="Gene Name(s)",alpha=.75) +
-                ylab("log2(FPKM)") +
+                ylab("log10(TPM+1)") +
                 theme_Publication() + 
                 theme(axis.text.x=element_text(angle=45, hjust=1))
         }
@@ -362,9 +362,9 @@ shinyServer(function(input, output,session) {
         # browser what name to use when saving the file.
         filename = function() {
             if(input$radio_gtex==1){
-                paste("FPKM.GTEx.vs.placenta.more.than",input$pt_fpkm2,"FPKM.csv.gz", sep = ".")
+                paste("TPM.GTEx.vs.placenta.more.than",input$pt_tpm2,"TPM.csv.gz", sep = ".")
             }else{
-                "FPKM.GTEx.vs.placenta.csv"
+                "TPM.GTEx.vs.placenta.csv"
             }
         },
         # This function should write data to a file given to it by
@@ -388,36 +388,36 @@ shinyServer(function(input, output,session) {
         dt.gtex.desc<-merge(dt.gtex.fpkm,dt.ensg.desc)
         my.ensg<-dt.gtex.desc[!Tissue %in% c("Placenta",input$no_gtex_tissue)
                               & baseMean > as.numeric(input$min_gtex_count)
-                              & !chromosome_name %in% c("Y","MT")
+                              & !chromosome_name %in% c("Y")
                               & gene_biotype==input$transcript_not_in_pt
                               ,.N,ensembl_gene_id][N==length(gtex_tissues)-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
         dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue 
                                    & ensembl_gene_id %in% my.ensg
-                                   ,.(Tissue,meanFpkm,rank=length(gtex_tissues)+1-length(input$no_gtex_tissue)+1 -rank(meanFpkm))
+                                   ,.(Tissue,TPM,rank=length(gtex_tissues)+1-length(input$no_gtex_tissue)+1 -rank(TPM))
                                    ,.(ensembl_gene_id,hgnc_symbol,description)][order(ensembl_gene_id,rank)] 
         if(input$no_ribosomal){
-            dt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+            dt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-TPM)] #
         }else{
-            dt.bottom<-dt.gtex.rank[rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-meanFpkm)] #
+            dt.bottom<-dt.gtex.rank[rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-TPM)] #
         }
         # genes where the placenta ranked at the bottom
         dt.gtex.rank[ensembl_gene_id %in% dt.bottom$ensembl_gene_id][order(ensembl_gene_id,rank)]
     })
 
-    # apply min FPKM of GTEx  & min FC
+    # apply min TPM of GTEx & min FC
     dt.pt.bottom.summary<-reactive({
         dt.pt.bottom<-dt.pt.bottom()
         # get min,max,mean,median of the genes above
         dt.pt.bottom.summary<-merge(
                                     merge(
-                                        dt.pt.bottom[,.(Tau=sapply(.SD,fTau)),.(ensembl_gene_id,hgnc_symbol,description),.SDcol="meanFpkm"],
+                                        dt.pt.bottom[,.(Tau=round(sapply(.SD,fTau)),3),.(ensembl_gene_id,hgnc_symbol,description),.SDcol="TPM"],
                                         dt.pt.bottom[Tissue!="Placenta",
-                                                    .(`GTEx_minFPKM`=round(min(meanFpkm),3),`GTEx_maxFPKM`=round(max(meanFpkm),3),`GTEx_medianFPKM`=round(median(meanFpkm),3),`GTEx_meanFPKM`=round(mean(meanFpkm),3)),
+                                                    .(`GTEx_minTPM`=min(TPM),`GTEx_maxTPM`=max(TPM),`GTEx_medianTPM`=median(TPM),`GTEx_meanTPM`=round(mean(TPM),3)),
                                                     .(ensembl_gene_id)]
                                     ),
-                                    dt.pt.bottom[Tissue=="Placenta",.(ensembl_gene_id,`Placenta_meanFPKM`=round(meanFpkm,3))]
-                                          )[order(Placenta_meanFPKM)]
-        dt.pt.bottom.summary[GTEx_minFPKM>as.numeric(input$min_gtex_fpkm) & GTEx_minFPKM/Placenta_meanFPKM>as.numeric(input$min_gtex_fc)]
+                                    dt.pt.bottom[Tissue=="Placenta",.(ensembl_gene_id,`Placenta_meanTPM`=TPM)]
+                                          )[order(Placenta_meanTPM)]
+        dt.pt.bottom.summary[GTEx_minTPM>as.numeric(input$min_gtex_tpm) & GTEx_minTPM/Placenta_meanTPM>as.numeric(input$min_gtex_fc)]
     })
 
     dt.pt.bottom.rank<-reactive({
@@ -472,7 +472,7 @@ shinyServer(function(input, output,session) {
         # browser what name to use when saving the file.
         filename = function() {
                 paste(input$not.in.pt.tab,"of",input$transcript_not_in_pt,"genes.not.in.placneta.but.in.gtex.at.least",
-                      input$min_gtex_count,"count",input$min_gtex_fpkm,"fpkm",input$min_gtex_fc,"FC.tsv.gz",sep=".")
+                      input$min_gtex_count,"count",input$min_gtex_tpm,"tpm",input$min_gtex_fc,"FC.tsv.gz",sep=".")
         },
         # This function should write data to a file given to it by
         # the argument 'file'.

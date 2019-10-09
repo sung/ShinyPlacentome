@@ -100,13 +100,13 @@ navbarPage(title="POPS Placenta Transcriptome",
                     mainPanel(
                         tabsetPanel(
                             tabPanel("PE",
-                                     DT::dataTableOutput('deg_boot_pe_all'),
-                                     hr(),
+                                     #DT::dataTableOutput('deg_boot_pe_all'),
+                                     #hr(),
                                      DT::dataTableOutput('deg_boot_pe_oneThird')
                             ),
                             tabPanel("SGA",
-                                     DT::dataTableOutput('deg_boot_sga_all'),
-                                     hr(),
+                                     #DT::dataTableOutput('deg_boot_sga_all'),
+                                     #hr(),
                                      DT::dataTableOutput('deg_boot_sga_oneThird')
                             )
                         )
@@ -228,8 +228,8 @@ navbarPage(title="POPS Placenta Transcriptome",
                                             "lincRNA"="lincRNA",
                                             "processed pseudogene"="processed_pseudogene")),
                         # drop down - min FPKM of placenta 
-                        selectInput("pt_fpkm1", 
-                                    label = "Minimum FPKM of Placenta:", 
+                        selectInput("pt_tpm1", 
+                                    label = "Minimum TPM of Placenta:", 
                                     choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10),
                                     selected=1),
                         # a set of radio buttons - transcript type
@@ -268,8 +268,8 @@ navbarPage(title="POPS Placenta Transcriptome",
                         # drop down - min FPKM of placenta 
                         conditionalPanel(
                             condition="input.radio_gtex==1",
-                            selectInput("pt_fpkm2", 
-                                        label = "Minimum FPKM of Placenta:", 
+                            selectInput("pt_tpm2", 
+                                        label = "Minimum TPM of Placenta:", 
                                         choices=list(`>0`=0,`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
                                         selected=1)
                         ),
@@ -281,10 +281,10 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ),
                     # Show a plot of the generated distribution
                     mainPanel(
-                        DT::dataTableOutput('gtex_fpkm'),
+                        DT::dataTableOutput('gtex_tpm'),
                         conditionalPanel(
                             condition="input.radio_gtex==2",
-                            plotOutput("gtex_fpkm_barchart")
+                            plotOutput("gtex_tpm_barchart")
                         )
                     ) # end of mainPanel
                 )
@@ -316,14 +316,14 @@ navbarPage(title="POPS Placenta Transcriptome",
                                     label = "Minimum read count of non-placental tissue:", 
                                     choices=list(`>10`=10,`>20`=20,`>50`=50, `>100`=100),
                                     selected=10),
-                        # drop down - min FPKM of GTEx 
-                        selectInput("min_gtex_fpkm", 
-                                    label = "Minimum FPKM of non-placental tissues:", 
+                        # drop down - min TPM of GTEx 
+                        selectInput("min_gtex_tpm", 
+                                    label = "Minimum TPM of non-placental tissues:", 
                                     choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
                                     selected=1),
-                        # drop down - min FPKM of placenta 
+                        # drop down - min TPM of placenta 
                         selectInput("min_gtex_fc", 
-                                    label = "Minimum fold change of a non-placental tissue compared with the placenta (i.e. FPKM (non-placenta) / FPKM (Placenta)):", 
+                                    label = "Minimum fold change of a non-placental tissue compared with the placenta (i.e. TPM (non-placenta) / TPM (Placenta)):", 
                                     choices=list(`>2x`=2,`>5x`=5,`>10x`=10,`>50x`=50,`>100x`=100),
                                     selected=5),
                         downloadButton("download_not_in_pt", "Download")
