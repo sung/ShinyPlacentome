@@ -5,7 +5,6 @@
     viewEnd:             693399,
     cookieKey:           'human-grc_h38',
 
-
     coordSystem: {
       speciesName: 'Human',
       taxon: 9606,
@@ -19,14 +18,18 @@
     reverseScrolling: true,
 
     chains: {
-      hg19ToHg38: new Chainset('http://www.derkholm.net:8080/das/hg19ToHg38/', 'GRCh37', 'GRCh38',
-                    {
-                        speciesName: 'Human',
-                        taxon: 9606,
-                        auth: 'GRCh',
-                        version: 37,
-                        ucscName: 'hg19'
-                    })
+        hg19ToHg38: {
+            // uri: '//www.biodalliance.org/datasets/hg19ToHg38.bb',
+            uri: '//www.obgyn.cam.ac.uk/Biodalliance/hg19ToHg38.bb',
+            type: 'bigbed',
+            coords: {
+                speciesName: 'Human',
+                taxon: 9606,
+                auth: 'GRCh',
+                version: 37,
+                ucscName: 'hg19'
+            }
+        }
     },
 
     browserLinks: {
@@ -35,7 +38,18 @@
       Sequence: '//www.derkholm.net:8080/das/hg19ToHg38/sequence?segment=${chr}:${start},${end}'
     },
 
-    hubs: ['http://ngs.sanger.ac.uk/production/ensembl/regulation/hub.txt', {url: 'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt', genome: 'hg19', mapping: 'hg19ToHg38'}],
+    hubs: [
+            {url: '//ftp.ensembl.org/pub/papers/regulation/hub.txt', 
+            forceProtocol: 'https',
+            genome: 'hg38'
+            //mapping: 'hg19ToHg38'
+            },
+
+            {url: 'http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/hub.txt',
+            forceProtocol: 'http',
+            genome: 'hg19',
+            mapping: 'hg19ToHg38'}
+    ],
 
 	sources: [
             {name: 'Genome',
@@ -76,7 +90,8 @@
             desc: 'CHESS v2.1',
             collapseSuperGroups: true,
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/chess2.1_assembly.ens.sorted.bb',
-            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml'},
+            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml',
+            trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/chess2.1_assembly.ens.sorted.geneName.ix'},
 
             {name: 'POPS Transcriptome v82',
             desc: 'Placenta Transcriptome',
@@ -103,6 +118,11 @@
             style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'rgb(196,86,39)', BGCOLOR: 'rgb(255,214,104)', LABEL:'yes',HEIGHT:8}}],
             trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/miRbase.v21.GRCh38.ix'},
 
+            {name: 'miRBase v22',
+            desc: 'microRNA sequences and annotations from miRBase v22',
+            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/miRbase.22.GRCh38.bb',
+            style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'rgb(204,98,53)', BGCOLOR: 'rgb(255,214,104)', LABEL:'yes',HEIGHT:8}}]},
+
             {name: 'piRBase v1.0',
             desc: 'piwi-interacting RNA sequences and annotations from piRBase v1',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/piRNA.v1-miR.overlap30.GRCh38.bb',
@@ -123,10 +143,7 @@
             desc: 'small RNA-Seq Coverage of POPS Cohort',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/POPS.small-RNA.GRCh38.depth.more.than.0.bw',
             style: [{type: 'default', style: {glyph: 'HISTOGRAM', BGCOLOR: 'rgb(75,71,166)', HEIGHT: 60, id: 'style1'}}],
-            noDownsample: true,
-            },
-
-
+            noDownsample: true}
 	],
   });
 
