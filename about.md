@@ -34,7 +34,7 @@
 ## Availability
 > The source code is available [here](https://github.com/sung/ShinyPlacentome)
 
-> RNA-seq data have been deposited in the [European genome-phenome archive](https://www.ebi.ac.uk/ega), with an accession number [EGAS00001002205](https://www.ebi.ac.uk/ega/studies/EGAS00001002205).
+> RNA-seq data have been deposited in the [European genome-phenome archive](https://www.ebi.ac.uk/ega), with an accession number [EGAS00001002205](https://ega-archive.org/studies/EGAS00001002205).
 
 ***
 Developed by [Sung Gong](https://www.obgyn.cam.ac.uk/staff/research-staff/sung-gong/)
