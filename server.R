@@ -388,7 +388,7 @@ shinyServer(function(input, output,session) {
         dt.gtex.desc<-merge(dt.gtex.fpkm,dt.ensg.desc[,.(ensembl_gene_id,description)],all.x=T)
         my.ensg<-dt.gtex.desc[!Tissue %in% c("Placenta",input$no_gtex_tissue)
                               & baseMean > as.numeric(input$min_gtex_count)
-                              & !chromosome_name %in% c("Y")
+                              #& !chromosome_name %in% c("Y")
                               & gene_biotype==input$transcript_not_in_pt
                               ,.N,ensembl_gene_id][N==length(gtex_tissues)-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
         dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue 
