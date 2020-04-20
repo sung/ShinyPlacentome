@@ -12,13 +12,13 @@ library(ggsci)
 library(shiny)
 
 load("RData/DEG.RData") # dt.deseq (isa data.table) # dt.boot (isa data.table) 3.1M
-load("RData/dt.gtex.pt.tpm.tau.RData") # dt.gtex.pt.tpm.tau (isa data.table) 3.2M
+load("RData/dt.gtex.pt.tpm.tau.RData") # dt.gtex.pt.tpm.tau (isa data.table) 3.2M # GRCh38.90
 #load("RData/dt.pops.tr.RData") # dt.pops.tr # it takes long
 #library(feather) # devtools::install_github("wesm/feather/R") 
                  # https://blog.rstudio.com/2016/03/29/feather/
 #dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
 load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R # 5.2M
-load("RData/dt.gtex.fpkm.RData") # 13M (ensembl_gene_id,hgnc_symbol,baseMean,TPM,Tissue,gene_biotye)
+load("RData/dt.gtex.tpm.RData") # 6.2M (ensembl_gene_id,hgnc_symbol,gene_biotype,baseMean,TPM,Tissue) # GRCh38.90
 load("RData/dt.ensg.desc.2019-05-20.RData") # 1.3M
 load("RData/dt.ensg.go.2019-05-22.RData") # 5.1M
 
@@ -385,10 +385,10 @@ shinyServer(function(input, output,session) {
     # 20 GTEx tissue + 'Placenta'
     # By deault, n=2('Breast' AND 'Blood') omiited from 20 GTEx
     dt.pt.bottom<-reactive({
-        dt.gtex.desc<-merge(dt.gtex.fpkm,dt.ensg.desc[,.(ensembl_gene_id,description)],all.x=T)
+        dt.gtex.desc<-merge(dt.gtex.tpm,dt.ensg.desc[,.(ensembl_gene_id,chromosome_name,description)],all.x=T)
         my.ensg<-dt.gtex.desc[!Tissue %in% c("Placenta",input$no_gtex_tissue)
                               & baseMean > as.numeric(input$min_gtex_count)
-                              #& !chromosome_name %in% c("Y")
+                              & !chromosome_name %in% c("Y")
                               & gene_biotype==input$transcript_not_in_pt
                               ,.N,ensembl_gene_id][N==length(gtex_tissues)-length(input$no_gtex_tissue),.N,ensembl_gene_id]$ensembl_gene_id
         dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue 
