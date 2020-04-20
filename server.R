@@ -394,7 +394,7 @@ shinyServer(function(input, output,session) {
         dt.gtex.rank<-dt.gtex.desc[!Tissue %in% input$no_gtex_tissue 
                                    & ensembl_gene_id %in% my.ensg
                                    ,.(Tissue,TPM,rank=length(gtex_tissues)+1-length(input$no_gtex_tissue)+1 -rank(TPM))
-                                   ,.(ensembl_gene_id,hgnc_symbol,description)][order(ensembl_gene_id,rank)] 
+                                   ,.(chromosome_name,ensembl_gene_id,hgnc_symbol,description)][order(ensembl_gene_id,rank)] 
         if(input$no_ribosomal){
             dt.bottom<-dt.gtex.rank[!grepl("ribosom",description) & rank==length(gtex_tissues)+1-length(input$no_gtex_tissue) & Tissue=="Placenta"][order(-TPM)] #
         }else{
@@ -410,7 +410,7 @@ shinyServer(function(input, output,session) {
         # get min,max,mean,median of the genes above
         dt.pt.bottom.summary<-merge(
                                     merge(
-                                        dt.pt.bottom[,.(Tau=round(sapply(.SD,fTau),3)),.(ensembl_gene_id,hgnc_symbol,description),.SDcol="TPM"],
+                                        dt.pt.bottom[,.(Tau=round(sapply(.SD,fTau),3)),.(chromosome_name,ensembl_gene_id,hgnc_symbol,description),.SDcol="TPM"],
                                         dt.pt.bottom[Tissue!="Placenta",
                                                     .(`GTEx_minTPM`=min(TPM),`GTEx_maxTPM`=max(TPM),`GTEx_medianTPM`=median(TPM),`GTEx_meanTPM`=round(mean(TPM),3)),
                                                     .(ensembl_gene_id)]
