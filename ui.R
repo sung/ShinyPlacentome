@@ -222,7 +222,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         helpText("Browse genes expressed specifically in the placenta"),
                         # drop down 
                         selectInput("transcript_tau", 
-                                label="Choose a type of transcript:",
+                                label="Choose a type of transcript (Ensembl v90 or Gencode v27):",
                                 choices = list(
                                             "protein coding"="protein_coding", 
                                             "lincRNA"="lincRNA",
@@ -304,13 +304,13 @@ navbarPage(title="POPS Placenta Transcriptome",
                                       ),
                         # drop down 
                         selectInput("transcript_not_in_pt", 
-                                label="Choose a type of transcript:",
+                                label="Choose a type of transcript (Ensembl v90 or Gencode v27):",
                                 choices = list("protein coding"="protein_coding", "lincRNA"="lincRNA"),
                                 selected="protein_coding"),
                         # checkbox
                         conditionalPanel(
                             condition="input.transcript_not_in_pt== 'protein_coding'",
-                            checkboxInput("no_ribosomal", label = "EXCLUDE ribosomal protein?", value = TRUE)),
+                            checkboxInput("no_ribosomal", label = "EXCLUDE ribosomal protein?", value = FALSE)),
                         # drop down - min baseMean
                         selectInput("min_gtex_count", 
                                     label = "Minimum read count of non-placental tissue:", 
@@ -324,8 +324,8 @@ navbarPage(title="POPS Placenta Transcriptome",
                         # drop down - min TPM of placenta 
                         selectInput("min_gtex_fc", 
                                     label = "Minimum fold change of a non-placental tissue compared with the placenta (i.e. TPM (non-placenta) / TPM (Placenta)):", 
-                                    choices=list(`>2x`=2,`>5x`=5,`>10x`=10,`>50x`=50,`>100x`=100),
-                                    selected=5),
+                                    choices=list(`>2x`=2,`>3x`=3,`>5x`=5,`>10x`=10,`>50x`=50,`>100x`=100),
+                                    selected=2),
                         downloadButton("download_not_in_pt", "Download")
                     ), # end of sidebarPanel
                     # Show a plot of the generated distribution
