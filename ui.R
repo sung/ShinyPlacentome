@@ -230,7 +230,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         # drop down - min FPKM of placenta 
                         selectInput("pt_tpm1", 
                                     label = "Minimum TPM of Placenta:", 
-                                    choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10),
+                                    choices=list(`>=0.1`=0.1,`>=1`=1,`>=5`=5, `>=10`=10),
                                     selected=1),
                         # a set of radio buttons - transcript type
                         # tau score range 
@@ -270,7 +270,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                             condition="input.radio_gtex==1",
                             selectInput("pt_tpm2", 
                                         label = "Minimum TPM of Placenta:", 
-                                        choices=list(`>0`=0,`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
+                                        choices=list(`>=0`=0,`>=0.1`=0.1,`>=1`=1,`>=5`=5, `>=10`=10,`>=100`=100),
                                         selected=1)
                         ),
                         conditionalPanel(

@@ -329,7 +329,7 @@ shinyServer(function(input, output,session) {
     dt.gtex<-reactive({
         if(input$radio_gtex==1){ # all the genes
             dt.gtex.tau<-cbind(dt.gtex.pt.tpm.tau[,1:4], dt.gtex.pt.tpm.tau[,.(Tau)],dt.gtex.pt.tpm.tau[,5:25])
-            dt.gtex.tau[Placenta > as.numeric(input$pt_tpm2)][order(-Placenta)]
+            dt.gtex.tau[Placenta >= as.numeric(input$pt_tpm2)][order(-Placenta)]
         }else{ # user-provided genes
             dt.foo<-melt.data.table(dt.gtex.pt.tpm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanTPMGTEx","Tau")],
                             id.vars=c("chromosome_name","ensembl_gene_id","hgnc_symbol","gene_biotype"), variable.name="Tissue", value.name="TPM")
