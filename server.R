@@ -12,12 +12,12 @@ library(ggsci)
 library(shiny)
 
 load("RData/DEG.RData") # dt.deseq (isa data.table) # dt.boot (isa data.table) 3.1M
-load("RData/dt.gtex.pt.tpm.tau.RData") # dt.gtex.pt.tpm.tau (isa data.table) 3.2M # GRCh38.90
 #load("RData/dt.pops.tr.RData") # dt.pops.tr # it takes long
 #library(feather) # devtools::install_github("wesm/feather/R") 
                  # https://blog.rstudio.com/2016/03/29/feather/
 #dt.pops.tr = data.table(feather::read_feather("RData/dt.pops.tr.feather")) # file too big (473MB)
 load("RData/dl.abundance.RData") # bin/R/Placentome/dl.pops.tr.abundance.R # 5.2M
+load("RData/dt.gtex.pt.tpm.tau.RData") # dt.gtex.pt.tpm.tau (isa data.table) 8M # GTEx v8.p2 
 load("RData/dt.gtex.tpm.RData") # 6.2M (ensembl_gene_id,hgnc_symbol,gene_biotype,baseMean,TPM,Tissue) # GRCh38.90
 load("RData/dt.ensg.desc.2019-05-20.RData") # 1.3M
 load("RData/dt.ensg.go.2019-05-22.RData") # 5.1M
@@ -263,7 +263,7 @@ shinyServer(function(input, output,session) {
     # 1. tau-based
     dt.tau<-reactive({
         dt.gtex.pt.tpm.tau[!grepl("^HIST",hgnc_symbol) & !hgnc_symbol%in%c("RMRP","AL356488.2") &
-                            gene_biotype==input$transcript_tau &  Placenta>as.numeric(input$pt_tpm1) & Tau>input$tau[1] & Tau<=input$tau[2] & Placenta/meanTPMGTEx > as.numeric(input$pt_gtex_fc),-"meanTPMGTEx"]
+                            gene_biotype==input$transcript_tau &  Placenta>as.numeric(input$pt_tpm1) & Tau>input$tau[1] & Tau<=input$tau[2] & Placenta/meanTPMGTEx > as.numeric(input$pt_gtex_fc),-"meanTPMGTEx"][order(-Placenta)]
     })
 
     row.num<-reactive({
@@ -279,13 +279,15 @@ shinyServer(function(input, output,session) {
         return(mat.tau)
     })
 
+    my.colnames<-colnames(dt.gtex.pt.tpm.tau)[1:4]
+    names(my.colnames)<-c("ENSG ID","Chr","Gene","Biotype")
     output$tau <- DT::renderDataTable({
         # Create a Progress object
         progress <- shiny::Progress$new()
         progress$set(message = "Loading table", value = 0)
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
-        DT::datatable(dt.tau()[,-"gene_biotype"], caption="Table 1. Expression level (TPM) of 20 somatic tissues (from GTEx) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.tau()[,-"gene_biotype"], caption="Table 1. Expression level (TPM) of 49 somatic tissues (from GTEx) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 10),colnames=my.colnames[1:3])
     })
 
     output$download_tau<- downloadHandler(
@@ -316,8 +318,10 @@ shinyServer(function(input, output,session) {
         d3heatmap(
             mat.tau(),
             cellnote=dt.tau()[,-c("ensembl_gene_id","Tau","chromosome_name","hgnc_symbol","gene_biotype")][1:row.num()],
-            dendrogram = "column",
-            xaxis_font_size = "10pt",
+            dendrogram = "both",
+            xaxis_height= 160,
+            yaxiss_width=40,
+            #xaxis_font_size = "10pt",
             colors = grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name="RdYlBu")))(100) 
         )
     })
@@ -328,7 +332,7 @@ shinyServer(function(input, output,session) {
 
     dt.gtex<-reactive({
         if(input$radio_gtex==1){ # all the genes
-            dt.gtex.tau<-cbind(dt.gtex.pt.tpm.tau[,1:4], dt.gtex.pt.tpm.tau[,.(Tau)],dt.gtex.pt.tpm.tau[,5:25])
+            dt.gtex.tau<-cbind(dt.gtex.pt.tpm.tau[,1:4], dt.gtex.pt.tpm.tau[,.(Tau)],dt.gtex.pt.tpm.tau[,5:54])
             dt.gtex.tau[Placenta >= as.numeric(input$pt_tpm2)][order(-Placenta)]
         }else{ # user-provided genes
             dt.foo<-melt.data.table(dt.gtex.pt.tpm.tau[hgnc_symbol %in% input$gtex_genes, -c("meanTPMGTEx","Tau")],
@@ -342,7 +346,7 @@ shinyServer(function(input, output,session) {
         progress$set(message = "Loading table", value = 0)
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
-        DT::datatable(dt.gtex(), caption="Table 1. Expression level (TPM) of 20 somatic tissues (from GTEx) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 21))
+        DT::datatable(dt.gtex(), caption="Table 1. Expression level (TPM) of 49 somatic tissues (from GTEx) and the placenta (this study)", rownames = FALSE, filter='top', options = list(pageLength = 50),colnames=my.colnames)
     })
 
     output$gtex_tpm_barchart<-renderPlot({
@@ -382,8 +386,8 @@ shinyServer(function(input, output,session) {
     #####################
     ## Not in Placenta ##
     #####################
-    # 20 GTEx tissue + 'Placenta'
-    # By deault, n=2('Breast' AND 'Blood') omiited from 20 GTEx
+    # 49 GTEx tissue + 'Placenta'
+    # By deault, n=2('Breast' AND 'Blood') omiited from 49 GTEx
     dt.pt.bottom<-reactive({
         dt.gtex.desc<-merge(dt.gtex.tpm,dt.ensg.desc[,.(ensembl_gene_id,chromosome_name,description)],all.x=T)
         my.ensg<-dt.gtex.desc[!Tissue %in% c("Placenta",input$no_gtex_tissue)
@@ -443,7 +447,7 @@ shinyServer(function(input, output,session) {
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
 
-        DT::datatable(dt.pt.bottom.summary(), rownames = FALSE, filter='top', options = list(pageLength = 15))
+        DT::datatable(dt.pt.bottom.summary(), rownames = FALSE, filter='top', options = list(pageLength = 10))
     })
 
     output$not_in_placenta_rank<- DT::renderDataTable({

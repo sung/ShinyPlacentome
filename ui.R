@@ -215,11 +215,11 @@ navbarPage(title="POPS Placenta Transcriptome",
     ), # end of tabPanel - Browse Transcript
 
     navbarMenu("Placenta vs. GTEx",
-        tabPanel(title="Placenta specific",
+        tabPanel(title="Placenta enriched",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
-                        helpText("Browse genes expressed specifically in the placenta"),
+                        helpText("Browse transcripts enriched in the placenta"),
                         # drop down 
                         selectInput("transcript_tau", 
                                 label="Choose a type of transcript (Ensembl v90 or Gencode v27):",
@@ -237,7 +237,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         sliderInput("tau", label = a("Tau score",href="https://academic.oup.com/bib/article/18/2/205/2562739",target="_blank"), min = 0.5, max = 1, value = c(0.99,1)),
                         # drop down - min FPKM of placenta 
                         selectInput("pt_gtex_fc", 
-                                    label = "Fold change of placenta compared with the average of 20 GTEx tissues:", 
+                                    label = "Fold change of placenta compared with the average of 49 GTEx tissues:", 
                                     choices=list(`>10x`=10,`>100x`=100,`>1000x`=1000),
                                     selected=100),
                         downloadButton("download_tau", "Download")
@@ -248,7 +248,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                         #verbatimTextOutput("options"),
                         #verbatimTextOutput("test4"),
                         verbatimTextOutput("heatmap_title"),
-                        d3heatmapOutput("heatmap", width="95%", height="1200px"),
+                        d3heatmapOutput("heatmap", width="100%", height="1100px"),
                         hr(),
                         DT::dataTableOutput('tau')
                     ) # end of mainPanel
@@ -260,7 +260,7 @@ navbarPage(title="POPS Placenta Transcriptome",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
-                        helpText("Tissue-wide comparision of abundance level"),
+                        helpText("Tissue-wide comparision of expression level"),
                         # radio button
                         radioButtons("radio_gtex", label ="List all or search genes of your interests",
                             choices = list("All" = 1, "Gene(s) of your interests" = 2), 
@@ -295,7 +295,7 @@ navbarPage(title="POPS Placenta Transcriptome",
             fluidPage(
                 sidebarLayout(
                     sidebarPanel(
-                        helpText("Browse genes not specifically expressed in the placneta compared other tissues"),
+                        helpText("Browse genes not enriched in the placneta compared other tissues"),
                         # checkbox of tissues to exclude
                         checkboxGroupInput("no_gtex_tissue", 
                                       label = "EXCLUDE following tissues from GTEx", 
