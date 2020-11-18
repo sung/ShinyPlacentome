@@ -214,7 +214,7 @@ navbarPage(title="POPS Placenta Transcriptome",
         ) # end of fludPage
     ), # end of tabPanel - Browse Transcript
 
-    navbarMenu("Placenta vs. GTEx",
+    navbarMenu("Placenta vs GTEx",
         tabPanel(title="Placenta enriched",
             fluidPage(
                 sidebarLayout(
