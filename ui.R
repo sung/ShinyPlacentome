@@ -44,6 +44,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                                             "circRNA"="circRNA",
                                             "miRNA"="miRNA",
                                             "piRNA"="piRNA",
+                                            "small non-coding RNA (snc-RNA)"="sncRNA",
                                             "novel protein-coding RNA"="novel-RPT:protein_coding",
                                             "novel lincRNA"="novel-RPT:lincRNA",
                                             "novel miRNA"="novel_miRNA",
@@ -87,6 +88,7 @@ navbarPage(title="POPS Placenta Transcriptome",
                                             "circRNA"="circRNA",
                                             "miRNA"="miRNA",
                                             "piRNA"="piRNA",
+                                            "small non-coding RNA (snc-RNA)"="sncRNA",
                                             "novel protein-coding RNA"="novel-RPT:protein_coding",
                                             "novel lincRNA"="novel-RPT:lincRNA",
                                             "novel miRNA"="novel_miRNA",
@@ -290,63 +292,64 @@ navbarPage(title="POPS Placenta Transcriptome",
                     ) # end of mainPanel
                 )
             )
-        ), # end of tabPanel - by gene name
-
-        tabPanel("Not in placenta",
-            fluidPage(
-                sidebarLayout(
-                    sidebarPanel(
-                        helpText("Browse genes not enriched in the placneta compared other tissues"),
-                        # checkbox of tissues to exclude
-                        checkboxGroupInput("no_gtex_tissue", 
-                                      label = "EXCLUDE following tissues from GTEx", 
-                                      choices=gtex_tissues,
-                                      selected=c("Blood","Breast")
-                                      ),
-                        # drop down 
-                        selectInput("transcript_not_in_pt", 
-                                label="Choose a type of transcript (Ensembl v90 or Gencode v27):",
-                                choices = list("protein coding"="protein_coding", "lincRNA"="lincRNA"),
-                                selected="protein_coding"),
-                        # checkbox
-                        conditionalPanel(
-                            condition="input.transcript_not_in_pt== 'protein_coding'",
-                            checkboxInput("no_ribosomal", label = "EXCLUDE ribosomal protein?", value = FALSE)),
-                        # drop down - min baseMean
-                        selectInput("min_gtex_count", 
-                                    label = "Minimum read count of non-placental tissue:", 
-                                    choices=list(`>10`=10,`>20`=20,`>50`=50, `>100`=100),
-                                    selected=10),
-                        # drop down - min TPM of GTEx 
-                        selectInput("min_gtex_tpm", 
-                                    label = "Minimum TPM of non-placental tissues:", 
-                                    choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
-                                    selected=1),
-                        # drop down - min TPM of placenta 
-                        selectInput("min_gtex_fc", 
-                                    label = "Minimum fold change of a non-placental tissue compared with the placenta (i.e. TPM (non-placenta) / TPM (Placenta)):", 
-                                    choices=list(`>2x`=2,`>3x`=3,`>5x`=5,`>10x`=10,`>50x`=50,`>100x`=100),
-                                    selected=2),
-                        downloadButton("download_not_in_pt", "Download")
-                    ), # end of sidebarPanel
-                    # Show a plot of the generated distribution
-                    mainPanel(
-                        tabsetPanel(
-                            tabPanel("Summary",value="summary",
-                                        DT::dataTableOutput('not_in_placenta_summary')
-                            ),
-                            tabPanel("Rank",value="rank",
-                                     DT::dataTableOutput('not_in_placenta_rank')
-                            ),
-                            tabPanel("GO annotation",value="go.annotation",
-                                     DT::dataTableOutput('not_in_placenta_go')
-                            ),
-                            id="not.in.pt.tab"
-                        )
-                    ) # end of mainPanel
-                ) # end of sidebarLayout
-            ) # end of fluidPage
-        ) # end of tabPanel - not in placenta 
+        ) # end of tabPanel - by gene name
+#        ), # end of tabPanel - by gene name
+#
+#        tabPanel("Not in placenta",
+#            fluidPage(
+#                sidebarLayout(
+#                    sidebarPanel(
+#                        helpText("Browse genes not enriched in the placneta compared other tissues"),
+#                        # checkbox of tissues to exclude
+#                        checkboxGroupInput("no_gtex_tissue", 
+#                                      label = "EXCLUDE following tissues from GTEx", 
+#                                      choices=gtex_tissues,
+#                                      selected=c("Blood","Breast")
+#                                      ),
+#                        # drop down 
+#                        selectInput("transcript_not_in_pt", 
+#                                label="Choose a type of transcript (Ensembl v90 or Gencode v27):",
+#                                choices = list("protein coding"="protein_coding", "lincRNA"="lincRNA"),
+#                                selected="protein_coding"),
+#                        # checkbox
+#                        conditionalPanel(
+#                            condition="input.transcript_not_in_pt== 'protein_coding'",
+#                            checkboxInput("no_ribosomal", label = "EXCLUDE ribosomal protein?", value = FALSE)),
+#                        # drop down - min baseMean
+#                        selectInput("min_gtex_count", 
+#                                    label = "Minimum read count of non-placental tissue:", 
+#                                    choices=list(`>10`=10,`>20`=20,`>50`=50, `>100`=100),
+#                                    selected=10),
+#                        # drop down - min TPM of GTEx 
+#                        selectInput("min_gtex_tpm", 
+#                                    label = "Minimum TPM of non-placental tissues:", 
+#                                    choices=list(`>0.1`=0.1,`>1`=1,`>5`=5, `>10`=10,`>100`=100),
+#                                    selected=1),
+#                        # drop down - min TPM of placenta 
+#                        selectInput("min_gtex_fc", 
+#                                    label = "Minimum fold change of a non-placental tissue compared with the placenta (i.e. TPM (non-placenta) / TPM (Placenta)):", 
+#                                    choices=list(`>2x`=2,`>3x`=3,`>5x`=5,`>10x`=10,`>50x`=50,`>100x`=100),
+#                                    selected=2),
+#                        downloadButton("download_not_in_pt", "Download")
+#                    ), # end of sidebarPanel
+#                    # Show a plot of the generated distribution
+#                    mainPanel(
+#                        tabsetPanel(
+#                            tabPanel("Summary",value="summary",
+#                                        DT::dataTableOutput('not_in_placenta_summary')
+#                            ),
+#                            tabPanel("Rank",value="rank",
+#                                     DT::dataTableOutput('not_in_placenta_rank')
+#                            ),
+#                            tabPanel("GO annotation",value="go.annotation",
+#                                     DT::dataTableOutput('not_in_placenta_go')
+#                            ),
+#                            id="not.in.pt.tab"
+#                        )
+#                    ) # end of mainPanel
+#                ) # end of sidebarLayout
+#            ) # end of fluidPage
+#        ) # end of tabPanel - not in placenta 
 
     ), # end of navbarMenu (Placenta vs GTEx)
 
