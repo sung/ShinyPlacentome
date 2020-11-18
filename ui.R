@@ -175,11 +175,12 @@ navbarPage(title="POPS Placenta Transcriptome",
                             label="Choose a type of transcript:",
                             choices = list(
                                         "protein coding"="protein_coding",  # total-RNA
-                                        "lincRNA"="lincRNA",                # total-RNA
-                                        "pseudogene"="pseudogene",          # total-RNA
+                                        "lincRNA"="lincRNA",
+                                        "pseudogene"="pseudogene",
                                         "circRNA"="circRNA",
                                         "miRNA"="miRNA",
                                         "piRNA"="piRNA",
+                                        "small non-coding RNA (snc-RNA)"="sncRNA",
                                         "novel transcript isoforms"="novel_isoform",
                                         "novel miRNA"="novel_miRNA",
                                         "novel small-RNA"="novel_smallRNA"),
@@ -214,7 +215,7 @@ navbarPage(title="POPS Placenta Transcriptome",
         ) # end of fludPage
     ), # end of tabPanel - Browse Transcript
 
-    navbarMenu("Placenta vs. GTEx",
+    navbarMenu("Placenta vs GTEx",
         tabPanel(title="Placenta enriched",
             fluidPage(
                 sidebarLayout(
