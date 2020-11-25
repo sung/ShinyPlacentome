@@ -1,3 +1,4 @@
+*.swp
 .Rproj.user
 .Rhistory
 .RData
@@ -5,4 +6,4 @@
 rsconnect/*
 shiny_bookmarks/*
 RData/dt.pops.*
-*.swp
+www/TrackHub/*
