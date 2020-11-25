@@ -379,6 +379,10 @@ navbarPage(title="POPS Placenta Transcriptome",
     #    "To Be Made..."
     #),
 
+    tabPanel(title="TrackHub",
+        includeMarkdown("trackhub.md")
+    ),
+
     tabPanel("About",
         fluidPage(
             fluidRow(
