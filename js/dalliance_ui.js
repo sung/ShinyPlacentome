@@ -59,16 +59,18 @@
             {name: 'Repeats',
             disabled: true,
             desc: 'Repeat annotation from UCSC', 
-            bwgURI: '//www.biodalliance.org/datasets/GRCh38/repeats.bb',
-            stylesheet_uri: '//www.biodalliance.org/stylesheets/bb-repeats2.xml'},
+            //bwgURI: '//www.biodalliance.org/datasets/GRCh38/repeats.bb',
+            //stylesheet_uri: '//www.biodalliance.org/stylesheets/bb-repeats2.xml'},
+            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/repeats.bb',
+            stylesheet_uri: '//www.obgyn.cam.ac.uk/Biodalliance/bb-repeats2.xml'},
 
             {name: 'GENCODEv21',
             disabled: true,
             desc: 'Gene structures from GENCODE 21',
-            bwgURI: '//www.biodalliance.org/datasets/GRCh38/gencode.v21.annotation.bb',
-            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml',
+            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/gencode.v21.annotation.bb',
+            stylesheet_uri: '//www.obgyn.cam.ac.uk/Biodalliance/gencode2.xml',
             collapseSuperGroups: true,
-            trixURI: '//www.biodalliance.org/datasets/GRCh38/gencode.v21.annotation.ix'},
+            trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/gencode.v21.annotation.ix'},
 
             {name: 'Ensembl REST',
             disabled: true,
@@ -82,7 +84,7 @@
             {name: 'Ensembl v94',
             desc: 'Ensembl Transcript Model v94',
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/Homo_sapiens.GRCh38.94.bb',
-            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml',
+            stylesheet_uri: '//www.obgyn.cam.ac.uk/Biodalliance/gencode2.xml',
             collapseSuperGroups: true,
             trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/Homo_sapiens.GRCh38.94.geneName.ix'},
 
@@ -90,14 +92,14 @@
             desc: 'CHESS v2.1',
             collapseSuperGroups: true,
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/chess2.1_assembly.ens.sorted.bb',
-            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode2.xml',
+            stylesheet_uri: '//www.obgyn.cam.ac.uk/Biodalliance/gencode2.xml',
             trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/chess2.1_assembly.ens.sorted.geneName.ix'},
 
             {name: 'POPS Transcriptome v82',
             desc: 'Placenta Transcriptome',
             collapseSuperGroups: true,
             bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/POPS.GRCh38.82.cuffcompare.combined.geneName.bb',
-            stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode.xml',
+            stylesheet_uri: '//www.obgyn.cam.ac.uk/Biodalliance/gencode.xml',
             trixURI: '//www.obgyn.cam.ac.uk/Biodalliance/POPS.GRCh38.82.cuffcompare.combined.geneName.ix'},
 
             {name: 'POPS30 circRNA',
@@ -131,7 +133,7 @@
         
             {name: 'POPS novel miRNA',
             desc: 'novel miRNAs present in at least one sample of POPS cohort',
-            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/novel.miRNA.GRCh38.merged.bb',
+            bwgURI: '//www.obgyn.cam.ac.uk/Biodalliance/novel.miRNA.GRCh38.merged.at.least.two.methods.bb',
             style: [{type: 'default', style:{glyph:'ANCHORED_ARROW', FGCOLOR: 'orange', BGCOLOR: 'yellow', LABEL:'yes',HEIGHT:8}}]},
 
             {name: 'POPS novel small-RNA',
