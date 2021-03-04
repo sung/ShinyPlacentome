@@ -1,7 +1,8 @@
 [![DOI](https://zenodo.org/badge/184614898.svg)](https://zenodo.org/badge/latestdoi/184614898)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Website obgyn.cam.ac.uk/placentome/](https://img.shields.io/website-up-down-green-red/https/www.obgyn.cam.ac.uk/placentome.svg)](https://www.obgyn.cam.ac.uk/placentome/)
 [![GitHub release](https://img.shields.io/github/release/sung/ShinyPlacentome.svg)](https://GitHub.com/sung/ShinyPlacentome/releases/)
+![GitHub all releases](https://img.shields.io/github/downloads/sung/shinyplacentome/total)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/sung/shinyplacentome/NatComRev1)
 ## Introduction
 A ShinyApp to search differentially expressed genes in the human placenta.
 This is a source code repository for https://www.obgyn.cam.ac.uk/placentome/.
